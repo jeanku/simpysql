@@ -76,39 +76,75 @@ ModelDemo().where('id', 4).delete()
 ModelDemo().where('id', '<', 10).delete()
 ```
 
-# select
-``` bash
-#单个查询 返回: {}
-data = ModelDemo().where('id', 4).first()                     # select * from lh_test where id = 4 limit 1
-data = ModelDemo().where('id', '=', 4).first()                # select * from lh_test where id = 4 limit 1
-data1 = ModelDemo().where('id', '>', 4).first()               # select * from lh_test where id > 4 limit 1
+## select
 
-# 多个查询 返回: [{}, {}, {}...]
-data = ModelDemo().where('id', '>=', 4).get()                 # select * from lh_test where id >= 4
-data = ModelDemo().where('id', '>', 4).get()                  # select * from lh_test where id > 4
-data = ModelDemo().where('id', '<', 4).get()                  # select * from lh_test where id < 4
-data = ModelDemo().where('id', '<=', 4).get()                 # select * from lh_test where id <= 4
-data = ModelDemo().where('id', '!=', 4).get()                 # select * from lh_test where id != 4
-data = ModelDemo().where('id', 'in', [1, 2]).get()            # select * from lh_test where id in (1,2)
-data = ModelDemo().where('id', 'not in', [1, 2]).get()        # select * from lh_test where id not in (1,2)
-data = ModelDemo().where('id', 'between', [1, 2]).get()       # select * from lh_test where id between (1,2)
-data = ModelDemo().where('id', 'not between', [1, 2]).get()   # select * from lh_test where id not between (1,2)
-data = ModelDemo().where('name', 'like', '%Tether%').get()    # select * from lh_test where name like '%Tether%'
-data = ModelDemo().where('name', 'not like', '%Tether%').get()# select * from lh_test where name not like '%Tether%'
+#单个查询
+``` bash
+# 对应sql: select * from lh_test where id = 4 limit 1
+data = ModelDemo().where('id', 4).first()                     
+data = ModelDemo().where('id', '=', 4).first()
+
+# 对应sql: select * from lh_test where id > 4 limit 1
+data1 = ModelDemo().where('id', '>', 4).first()
+返回格式: {...}
+```
+
+#多个查询
+``` bash
+# 对应sql: select * from lh_test where id >= 4
+data = ModelDemo().where('id', '>=', 4).get() 
+
+# 对应sql: select * from lh_test where id > 4
+data = ModelDemo().where('id', '>', 4).get() 
+
+# 对应sql: select * from lh_test where id < 4
+data = ModelDemo().where('id', '<', 4).get()   
+
+# 对应sql: select * from lh_test where id <= 4
+data = ModelDemo().where('id', '<=', 4).get()
+
+# 对应sql: select * from lh_test where id != 4
+data = ModelDemo().where('id', '!=', 4).get()
+
+# 对应sql: select * from lh_test where id in (1,2)
+data = ModelDemo().where('id', 'in', [1, 2]).get()
+
+# 对应sql: select * from lh_test where id not in (1,2)
+data = ModelDemo().where('id', 'not in', [1, 2]).get()
+
+# 对应sql: select * from lh_test where id between (1,2)
+data = ModelDemo().where('id', 'between', [1, 2]).get()
+
+# 对应sql: select * from lh_test where id not between (1,2)
+data = ModelDemo().where('id', 'not between', [1, 2]).get() 
+
+# 对应sql: select * from lh_test where name like '%Tether%'
+data = ModelDemo().where('name', 'like', '%Tether%').get()
+
+# 对应sql: select * from lh_test where name not like '%Tether%'
+data = ModelDemo().where('name', 'not like', '%Tether%').get()
+
+返回格式: [{...}, {...}, {...}...]
+```
 
 # 多条件查询
+``` bash
 #对应sql:select * from lh_test where id=1 and name='hehe'
 data = ModelDemo().where({'id': 1, 'name': 'hehe'}).get()
 data = ModelDemo().where('id', 1).where('name', 'hehe').get()
-
+```
 # 排序
-#按id正序
+``` bash
+#正序
+#对应sql: select * from lh_test where id > 0 order by id
 data = ModelDemo().where('id', '>', 0).orderby('id').get()
 data = ModelDemo().where('id', '>', 0).orderby('id', 'asc').get()
-#按id倒序
+
+#倒序
+#对应sql: select * from lh_test where id > 0 order by id desc
 data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').get()
+
 #多字段排序 
 #对应sql: select * from lh_test where `id` > 0 order by `id` desc,`status`
 data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').orderby('status', 'desc').get()
-
 ```
