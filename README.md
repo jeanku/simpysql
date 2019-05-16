@@ -207,9 +207,7 @@ data = ModelDemo().transaction(demo)
 # 切换数据库
 ``` bash
 使用.env中默认的default数据库:
-    方案1:  不设置ModelDemo类中的__database__属性
-    方案2:  在ModelDemo类中设置__database__='default'
-        #__database__ = 'default'                    # 库名
+    不设置ModelDemo类中的__database__属性 或者 在ModelDemo类中设置__database__='default'
 使用.env中test_db2数据库:
     在ModelDemo类中设置__database__='test_db2'
 
