@@ -7,9 +7,8 @@ Via pip
 ```
 
 
-# Initialization
-you need to create a .env file at your project root path, and content as follows:
-and .env file path is: /home/project/.env
+## Initialization
+you need to create a .env file at your project root path (/home/project/.env), and content as follows: 
 ``` bash
 [default]
 DB_HOST=127.0.0.1
@@ -21,7 +20,7 @@ DB_CHARSET=utf8mb4
 LOG_DIR=/home/logs/python/
 ```
 
-# Usage
+## Create Model
 Create your Model extend DBModel as follows:
 ``` bash
 #!/usr/bin/python
@@ -42,4 +41,37 @@ class ModelDemo(DBModel):
         'create_time',
         'update_time',
     ]
+```
+
+## Usage
+# create
+``` bash
+#单个添加
+ModelDemo().create({'name': "haha1", 'token_name': 'haha124'})
+#多个添加
+ModelDemo().create([{'name': "haha1", 'token_name': 'haha124'}, {'name':"haha2", 'token_name': 'haha125'}])
+#获取添加数据自增ID
+id = ModelDemo().create({'name': "haha1", 'token_name': 'haha124'}).lastid()
+```
+
+# update
+``` bash
+#单个更新
+ModelDemo().where('id', 1).update({'name':"hehe", 'token_name': 'hehe123'})
+#范围更新
+ModelDemo().where('id', 'in', [1, 2, 3]).update({'name':"hehe", 'token_name': 'hehe123'})
+#自增自增
+ModelDemo().where('id', 1).increment('status')        #status自增1
+ModelDemo().where('id', 1).increment('status', 5)     #status自增5
+#自增自减
+ModelDemo().where('id', 1).decrement('status')        #status自减1
+ModelDemo().where('id', 1).decrement('status', 5)     #status自减5
+```
+
+# delete
+``` bash
+#单个删除
+ModelDemo().where('id', 4).delete()
+#范围删除
+ModelDemo().where('id', '<', 10).delete()
 ```
