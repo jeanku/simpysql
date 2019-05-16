@@ -38,9 +38,10 @@ from hangsql.DBModel import DBModel
 
 class ModelDemo(DBModel):
     __basepath__ = '/home/project/'             # 项目根目录 (.env文件路径:/home/project/.env)
+    #__database__ = 'default'                   # 库名
     __tablename__ = 'lh_test'                   # 表名
-    __create_time__ = 'create_time'             # 插入时间字段 如果该字段为None create_time则不会自动添加
-    __update_time__ = 'update_time'             # 更新时间字段 如果该字段为None update_time则不会自动添加
+    __create_time__ = 'create_time'             # 插入时间字段 如果该字段为None create_time则不会自动添加 默认值当前时间戳(单位:秒)
+    __update_time__ = 'update_time'             # 更新时间字段 如果该字段为None update_time则不会自动添加 默认值当前时间戳(单位:秒)
     columns = [                                 # 数据库字段
         'id',
         'name',
@@ -49,6 +50,10 @@ class ModelDemo(DBModel):
         'create_time',
         'update_time',
     ]
+    
+    # 获取时间格式(如果想修改create_time, update_time 时间格式，重写该方法即可)
+    # def fresh_timestamp(self):
+    #     return datetime.datetime.now().strftime("%Y%m%d")
 ```
 
 ## Usage
