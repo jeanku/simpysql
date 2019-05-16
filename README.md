@@ -75,3 +75,40 @@ ModelDemo().where('id', 4).delete()
 #范围删除
 ModelDemo().where('id', '<', 10).delete()
 ```
+
+# select
+``` bash
+#单个查询 返回: {}
+data = ModelDemo().where('id', 4).first()                     # select * from lh_test where id = 4 limit 1
+data = ModelDemo().where('id', '=', 4).first()                # select * from lh_test where id = 4 limit 1
+data1 = ModelDemo().where('id', '>', 4).first()               # select * from lh_test where id > 4 limit 1
+
+# 多个查询 返回: [{}, {}, {}...]
+data = ModelDemo().where('id', '>=', 4).get()                 # select * from lh_test where id >= 4
+data = ModelDemo().where('id', '>', 4).get()                  # select * from lh_test where id > 4
+data = ModelDemo().where('id', '<', 4).get()                  # select * from lh_test where id < 4
+data = ModelDemo().where('id', '<=', 4).get()                 # select * from lh_test where id <= 4
+data = ModelDemo().where('id', '!=', 4).get()                 # select * from lh_test where id != 4
+data = ModelDemo().where('id', 'in', [1, 2]).get()            # select * from lh_test where id in (1,2)
+data = ModelDemo().where('id', 'not in', [1, 2]).get()        # select * from lh_test where id not in (1,2)
+data = ModelDemo().where('id', 'between', [1, 2]).get()       # select * from lh_test where id between (1,2)
+data = ModelDemo().where('id', 'not between', [1, 2]).get()   # select * from lh_test where id not between (1,2)
+data = ModelDemo().where('name', 'like', '%Tether%').get()    # select * from lh_test where name like '%Tether%'
+data = ModelDemo().where('name', 'not like', '%Tether%').get()# select * from lh_test where name not like '%Tether%'
+
+# 多条件查询
+#对应sql:select * from lh_test where id=1 and name='hehe'
+data = ModelDemo().where({'id': 1, 'name': 'hehe'}).get()
+data = ModelDemo().where('id', 1).where('name', 'hehe').get()
+
+# 排序
+#按id正序
+data = ModelDemo().where('id', '>', 0).orderby('id').get()
+data = ModelDemo().where('id', '>', 0).orderby('id', 'asc').get()
+#按id倒序
+data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').get()
+#多字段排序 
+#对应sql: select * from lh_test where `id` > 0 order by `id` desc,`status`
+data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').orderby('status', 'desc').get()
+
+```
