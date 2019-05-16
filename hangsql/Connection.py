@@ -65,12 +65,13 @@ class Connection(object):
         del self._transaction
 
     def log(self, sql):
-        path = config.items(self._database).get('LOG_DIR', None)
         if self._logger:
             self._logger.info('【sql】:{}'.format(sql))
-        if path is not None:
-            self._logger = logger.set_path(path)
-            self._logger.info('【sql】:{}'.format(sql))
+        else:
+            path = config.items(self._database).get('LOG_DIR', None)
+            if path is not None:
+                self._logger = logger.set_path(path)
+                self._logger.info('【sql】:{}'.format(sql))
 
 
 connection = Connection()
