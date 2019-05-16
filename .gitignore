@@ -1,3 +1,7 @@
 .DS_Store
 .idea/
 setup.py
+build/
+dist/
+hangsql.egg-info/
+LICENSE

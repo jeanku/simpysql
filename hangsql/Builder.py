@@ -130,6 +130,9 @@ class Builder(object):
             self.__orderby__.append(expression.format_sql_column(column) + ' desc')
         return self
 
+    def execute(self, sql):
+        return self._get_connection().execute(sql)
+
     def _compile_select(self):
         subsql = ''.join(
             [self._compile_where(), self._compile_groupby(), self._compile_orderby(), self._compile_limit(),
