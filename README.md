@@ -17,6 +17,11 @@ ModelDemo().where('id', 4).select('id', 'name').take(5).get()
     - [One Data](#one-data)
     - [Multi Data](#multi-data)
     - [Get Lastid](#get-lastid)
+- [Update](#update)
+    - [Update Data](#update-data)
+    - [Increament](#increament)
+    - [Decreament](#decreament)
+- [Delete](#delete)
 - [FAQ](#faq)
 - [To Do](#to-do)
 
@@ -80,59 +85,48 @@ class ModelDemo(DBModel):
 ```
 
 
-
-
-## Authors
-
-* ** -- ** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-
-
-
-
 # Create
 
 ## One Data
-``` bash
-#单个添加
+``` python
 ModelDemo().create({'name': "haha1", 'token_name': 'haha124'})
 ```
 
 ## Multi Data
-``` bash
+``` python
 ModelDemo().create([{'name': "haha1", 'token_name': 'haha124'}, {'name':"haha2", 'token_name': 'haha125'}])
-#获取添加数据自增ID
-id = ModelDemo().create({'name': "haha1", 'token_name': 'haha124'}).lastid()
 ```
 
 ## Get Lastid
-``` bash
+``` python
 id = ModelDemo().create({'name': "haha1", 'token_name': 'haha124'}).lastid()
 ```
 
-# update
-``` bash
-#单个更新
+# Update
+
+## Update Data
+``` python
 ModelDemo().where('id', 1).update({'name':"hehe", 'token_name': 'hehe123'})
-#范围更新
-ModelDemo().where('id', 'in', [1, 2, 3]).update({'name':"hehe", 'token_name': 'hehe123'})
-#自增自增
-ModelDemo().where('id', 1).increment('status')        #status自增1
-ModelDemo().where('id', 1).increment('status', 5)     #status自增5
-#自增自减
-ModelDemo().where('id', 1).decrement('status')        #status自减1
-ModelDemo().where('id', 1).decrement('status', 5)     #status自减5
 ```
 
-# delete
+## Increment
+``` python
+ModelDemo().where('id', 1).increment('status')        #status increment by 1
+ModelDemo().where('id', 1).increment('status', 5)     #status increment by 5
+```
+
+## Decrement
+``` python
+ModelDemo().where('id', 1).decrement('status')        #status decrement by 1
+ModelDemo().where('id', 1).decrement('status', 5)     #status decrement by 5
+```
+
+# Delete
 ``` bash
-#单个删除
 ModelDemo().where('id', 4).delete()
-#范围删除
-ModelDemo().where('id', '<', 10).delete()
 ```
 
-## select
+## Select
 
 #单个查询
 ``` bash
@@ -280,3 +274,11 @@ ModelDemo().database('test_db2').where('id', '>', 40).first()
     在.env中配置中删除LOG_DIR配置
     在.env中配置中注释掉LOG_DIR配置(前加#号)， 例如: #LOG_DIR=/home/logs/python/
 ```
+
+
+
+
+
+## Authors
+
+* ** -- ** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
