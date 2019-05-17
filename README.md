@@ -51,9 +51,9 @@ you need to create a .env file at your project root path, and content as follows
 
 ``` python
 [default]
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_NAME=test_db1
+DB_HOST=127.0.0.1                              
+DB_PORT=3306                                    
+DB_NAME=test_db1                                
 DB_USER=root
 DB_PASSWORD=123456
 DB_CHARSET=utf8mb4
@@ -253,11 +253,19 @@ data = ModelDemo().transaction(demo)
 ```
 
 # Database
+<<<<<<< HEAD
 
 ``` python
 set ModelDemo attribute as follow:
 __database__ = 'test_db2'
 
+=======
+
+``` python
+set ModelDemo attribute as follow:
+__database__ = 'test_db2'
+
+>>>>>>> c4aa1d360a5cdbdb80c43982aa4756f3c6ba0f4b
 set database in your code:
 ModelDemo().database('test_db2').where('id', '>', 40).first()
 ```
@@ -266,4 +274,8 @@ ModelDemo().database('test_db2').where('id', '>', 40).first()
 ``` python
 set LOG_DIR in your .env file:
 LOG_DIR=/home/logs/python/
+<<<<<<< HEAD
 ```
+=======
+```
+>>>>>>> c4aa1d360a5cdbdb80c43982aa4756f3c6ba0f4b
