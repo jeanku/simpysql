@@ -267,7 +267,3 @@ ModelDemo().database('test_db2').where('id', '>', 40).first()
 set LOG_DIR in your .env file:
 LOG_DIR=/home/logs/python/
 ```
-
-## Authors
-
-* ** jeanku ** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
