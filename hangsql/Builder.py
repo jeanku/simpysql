@@ -44,6 +44,11 @@ class Builder(object):
             self.__select__.append('*')
         return Response(self._get_connection().execute(self._compile_select(), DictCursor)).tolist(columns)
 
+    def data(self):
+        if len(self.__select__) == 0:
+            self.__select__.append('*')
+        return Response(self._get_connection().execute(self._compile_select(), DictCursor)).data()
+
     def response(self):
         if len(self.__select__) == 0:
             self.__select__.append('*')

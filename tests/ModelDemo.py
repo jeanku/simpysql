@@ -82,6 +82,11 @@ if __name__ == '__main__':
     # data = ModelDemo().select('min(id) as minid').first()        # select min(id) as minid from lh_test limit 1
     # data = ModelDemo().select('max(id) as maxid').first()        # select max(id) as maxid from lh_test limit 1
 
+    # 返回list
+    data = ModelDemo().select('id', 'name').lists(['id', 'name'])  # select `id`,`name` from lh_test limit 5
+    # data = ModelDemo().select('id', 'name', 'status').data()
+    # data = ModelDemo().select('min(id) as minid').first()        # select min(id) as minid from lh_test limit 1
+
     # groupby
     # select count(*) as num,`name` from lh_test group by `name`
     # data = ModelDemo().select('count(*) as num', 'name').groupby('name').get()
@@ -101,7 +106,7 @@ if __name__ == '__main__':
 
     # data = ModelDemo().database('icoape').where('id', '>', 40).first()
     # print(data)
-    data = ModelDemo().first()
+    # data = ModelDemo().first()
     print(data)
 
     pass
