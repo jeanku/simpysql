@@ -6,4 +6,4 @@ LICENSE
 build/
 dist/
 hangsql.egg-info/
-hangsql/__pycache__/Builder.cpython-37.pyc
+hangsql/__pycache__/*.pyc

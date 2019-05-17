@@ -83,7 +83,7 @@ if __name__ == '__main__':
     # data = ModelDemo().select('max(id) as maxid').first()        # select max(id) as maxid from lh_test limit 1
 
     # 返回list
-    data = ModelDemo().select('id', 'name').lists(['id', 'name'])  # select `id`,`name` from lh_test limit 5
+    data = ModelDemo().select('id', 'name', 'status').lists(['id', 'name'])   # select `id`,`name` from lh_test limit 5
     # data = ModelDemo().select('id', 'name', 'status').data()
     # data = ModelDemo().select('min(id) as minid').first()        # select min(id) as minid from lh_test limit 1
 
