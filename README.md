@@ -201,7 +201,6 @@ sql = 'select count(*) as num,name from lh_test group by name'
 data = ModelDemo().execute(sql)
 ```
 
-
 # 返回结果
 ``` bash
 data = ModelDemo().where('id', 'in', [1,2,3]).select('id', 'name').lists('id')          # [1,2,3]
