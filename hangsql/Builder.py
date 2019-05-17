@@ -26,6 +26,7 @@ class Builder(object):
         self.__orderby__ = []                       # 排序字段
         self.__groupby__ = []                       # 排序字段
         self.__offset__ = None                      # offset
+        self.__lock__ = None                        # offset
 
     def first(self):
         self.__limit__ = 1
@@ -128,6 +129,24 @@ class Builder(object):
             raise Exception('bad parameters in where function')
         return self
 
+    def orwhere(self, *args):
+        length = args.__len__()
+        if length == 1 and isinstance(args[0], dict) or isinstance(args[0], list):
+            self.__orwhere__.append(args[0])
+        elif length == 2:
+            self.__orwhere__.append({args[0]: args[1]})
+        elif length == 3:
+            if args[1] in self.operators:
+                if args[1] == '=':
+                    self.__orwhere__.append({args[0]: args[2]})
+                else:
+                    self.__orwhere__.append((args[0], args[1], args[2]))
+            else:
+                raise Exception('operator key world not found: "{}"'.format(args[1]))
+        else:
+            raise Exception('bad parameters in where function')
+        return self
+
     def orderby(self, column, direction='asc'):
         if direction.lower() == 'asc':
             self.__orderby__.append(expression.format_sql_column(column))
@@ -138,10 +157,20 @@ class Builder(object):
     def execute(self, sql):
         return self._get_connection().execute(sql)
 
+    def lock_for_update(self):
+        self.__lock__ = ' for update'
+        return self
+
+    def lock_for_share(self):
+        self.__lock__ = ' lock in share mode'
+        return self
+
     def _compile_select(self):
         subsql = ''.join(
-            [self._compile_where(), self._compile_groupby(), self._compile_orderby(), self._compile_limit(),
-             self._compile_offset()])
+            [self._compile_where(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(), self._compile_limit(),
+             self._compile_offset(), self._compile_lock()])
+        print("select {} from {}{}".format(','.join(self.__select__), self._tablename(), subsql))
+        exit(0)
         return "select {} from {}{}".format(','.join(self.__select__), self._tablename(), subsql)
 
     def _compile_create(self, data):
@@ -189,6 +218,9 @@ class Builder(object):
     def _compile_offset(self):
         return '' if self.__offset__ is None else ' offset {}'.format(self.__offset__)
 
+    def _compile_lock(self):
+        return '' if self.__lock__ is None else self.__lock__
+
     def _compile_where(self):
         if len(self.__where__) > 0:
             sqlstr = []
@@ -213,6 +245,33 @@ class Builder(object):
                     sqlstr.append(
                         '{}={}'.format(expression.format_sql_column(index), expression.format_str_with_quote(values)))
             return ' where {}'.format(' and '.join(sqlstr))
+        return ''
+
+    def _compile_orwhere(self):
+        if len(self.__orwhere__) > 0:
+            sqlstr = []
+            for index in self.__orwhere__:
+                if isinstance(index, dict):
+                    subsql = []
+                    for index, value in index.items():
+                        subsql.append('{}={}'.format(expression.format_sql_column(index), expression.format_str_with_quote(value)))
+                    sqlstr.append(' and '.join(subsql))
+                elif isinstance(index, tuple):
+                    sqlstr.append('{} {} {}'.format(expression.format_sql_column(index[0]), index[1], expression.format_str_with_quote(index[2])))
+                elif isinstance(index, list):
+                    subsql = []
+                    for items in index:
+                        if len(items) == 2:
+                            subsql.append('{}={}'.format(expression.format_sql_column(items[0]), expression.format_str_with_quote(items[1])))
+                        if len(items) == 3:
+                            subsql.append('{} {} {}'.format(expression.format_sql_column(items[0]), items[1], expression.format_str_with_quote(items[2])))
+                    sqlstr.append(' and '.join(subsql))
+
+                else:
+                    raise Exception('undefined query condition {}'.format(index.__str__()))
+            if len(self.__where__) > 0:
+                return ' or {}'.format(' or '.join(sqlstr))
+            return ' {}'.format(' or '.join(sqlstr))
         return ''
 
     def _get_connection(self):
@@ -249,3 +308,6 @@ class Builder(object):
 
     def transaction(self, callback):
         return self._get_connection().transaction(callback)
+
+    def transaction_wrapper(self, callback):
+        return self._get_connection().transaction_wrapper(callback)

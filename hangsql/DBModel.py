@@ -26,6 +26,10 @@ class DBModel():
     def fresh_timestamp(self):
         return int(time.time())
 
+    @classmethod
+    def transaction(cls, callback):
+        return cls.__new__(cls).transaction_wrapper(callback)
+
     def __new__(cls, *args, **kwargs):
         if hasattr(cls, '__database__'):
             connection.set_config(cls.__basepath__, cls.__database__)

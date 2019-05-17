@@ -11,6 +11,7 @@ from tests.BaseModel import BaseModel
 class ModelDemo(BaseModel):
 
     __tablename__ = 'lh_test'                   # 表名
+    __database__ = None
 
     __create_time__ = 'create_time'             # 插入时间字段 如果该字段为None create_time则不会自动添加
 
@@ -83,7 +84,7 @@ if __name__ == '__main__':
     # data = ModelDemo().select('max(id) as maxid').first()        # select max(id) as maxid from lh_test limit 1
 
     # 返回list
-    data = ModelDemo().select('id', 'name', 'status').lists(['id', 'name'])   # select `id`,`name` from lh_test limit 5
+    # data = ModelDemo().select('id', 'name', 'status').lists(['id', 'name'])   # select `id`,`name` from lh_test limit 5
     # data = ModelDemo().select('id', 'name', 'status').data()
     # data = ModelDemo().select('min(id) as minid').first()        # select min(id) as minid from lh_test limit 1
 
@@ -97,16 +98,31 @@ if __name__ == '__main__':
 
     # 事务
     # def demo():
-    #     ModelDemo().where('id', 42).update({'name': "44", 'token_name': '444'})
-    #     ModelDemo().where('id', 43).update({'name': "44", 'token_name': '444'})
-    #     raise Exception('haha')
+    #     ModelDemo().where('id', 42).lock_for_update().first()
+    #     ModelDemo().where('id', 42).update({'name': "555", 'token_name': '555'})
+    #     # ModelDemo().where('id', 43).update({'name': "44", 'token_name': '444'})
+    #     # raise Exception('haha')
     #     return True
     #
     # data = ModelDemo().transaction(demo)
 
     # data = ModelDemo().database('icoape').where('id', '>', 40).first()
     # print(data)
-    # data = ModelDemo().first()
-    print(data)
+    # data = ModelDemo().orwhere('name', 'like', 1).orwhere('id', '=', 2).orwhere({'name':3, 'age':25}).orwhere(
+    #     [
+    #         ('age', '>', 15),
+    #         ['name', 'like', '%hgge%'],
+    #         ['create_time', '<', 1555123],
+    #     ]
+    # ).first()
+
+    # data = ModelDemo().where('id', 1001).orwhere('name', 'like', 'haha').orwhere([
+    #         ('age', '>', 15),
+    #         ['name', 'like', '%hgge%'],
+    #         ['create_time', '<', 1555123],
+    #  ]).first()
+    # print(ModelDemo().lock_for_update().first())
+    # print(ModelDemo().lock_for_share().first())
+    # print(data)
 
     pass

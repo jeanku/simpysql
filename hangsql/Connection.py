@@ -2,8 +2,10 @@
 # -*- coding: utf-8 -*-
 
 import pymysql
+from .Connectionpool import Connectionpool
 from .Logger import logger
 from .Config import config
+from functools import wraps
 
 
 class Connection(object):
@@ -14,6 +16,7 @@ class Connection(object):
 
     def execute(self, sql, cursorclass=None):
         self.log(sql)
+        exit(0)
         cursor = self.connect().cursor(cursor=cursorclass)
         cursor.execute(sql)
         data = cursor.fetchall()
@@ -34,10 +37,24 @@ class Connection(object):
             self.end()
             raise e
 
+    def transaction_wrapper(self,callback):
+        try:
+            self.start()
+            @wraps(callback)
+            def wrapper(*args, **kwargs):
+                return callback(*args, **kwargs)
+            self.connect().commit()
+            self.end()
+            return wrapper
+        except Exception as e:
+            self.connect().rollback()
+            self.end()
+            raise e
+
     def connect(self):
         if self._connection.get(self._database, None) is None:
             pro_db_config = self.config()
-            self._connection[self._database] = pymysql.connect(**pro_db_config)
+            self._connection[self._database] = Connectionpool.connection(pro_db_config)
         return self._connection[self._database]
 
     def set_config(self, path, database='default'):
