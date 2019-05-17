@@ -201,6 +201,13 @@ sql = 'select count(*) as num,name from lh_test group by name'
 data = ModelDemo().execute(sql)
 ```
 
+# 返回结果
+``` bash
+data = ModelDemo().where('id', 'in', [1,2,3]).select('id', 'name').lists('id')          # [1,2,3]
+data = ModelDemo().where('id', 'in', [1,2]).select('id', 'name').lists(['id', 'name'])  # [[1,'name1'],[2,'name2']]
+data = ModelDemo().select('id', 'name', 'status').data()                                # 返回pandas DataFrame
+```
+
 # 事务
 ``` bash
 def demo():       #事务闭包
