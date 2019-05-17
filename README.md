@@ -12,14 +12,11 @@ ModelDemo().where('id', 4).select('id', 'name').take(5).get()
 
 - [Installation](#installing)
 - [Initialization](#initialization)
-- [Usage](#usage)
-    - [Create Model](##model)
-    - [Create](##create)
-    - [Update](##update)
-    - [Delete](##delete)
-    - [Select](##select)
-     - [Single Select](##select)
-     - [Multi Select](##select)
+- [Create Model](#create-model)
+- [Create](#create)
+    - [One Data](##one-data)
+    - [Multi Data](##multi-data)
+    - [Get Lastid](##get-lastid)
 - [FAQ](#faq)
 - [To Do](#to-do)
 
@@ -53,9 +50,8 @@ DB_PASSWORD=123456
 DB_CHARSET=utf8mb4
 LOG_DIR=/home/logs/python/
 ```
-# Usage
 
-## Model
+## Create Model
 Create your Model extend DBModel as follows:
 
 ``` python
@@ -95,12 +91,22 @@ class ModelDemo(DBModel):
 
 
 # Create
+
+## One Data
 ``` bash
 #单个添加
 ModelDemo().create({'name': "haha1", 'token_name': 'haha124'})
-#多个添加
+```
+
+## Multi Data
+``` bash
 ModelDemo().create([{'name': "haha1", 'token_name': 'haha124'}, {'name':"haha2", 'token_name': 'haha125'}])
 #获取添加数据自增ID
+id = ModelDemo().create({'name': "haha1", 'token_name': 'haha124'}).lastid()
+```
+
+## Get Lastid
+``` bash
 id = ModelDemo().create({'name': "haha1", 'token_name': 'haha124'}).lastid()
 ```
 
