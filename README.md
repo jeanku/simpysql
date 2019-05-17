@@ -51,13 +51,13 @@ you need to create a .env file at your project root path, and content as follows
 
 ``` python
 [default]
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_NAME=test_db1
+DB_HOST=127.0.0.1                              
+DB_PORT=3306                                    
+DB_NAME=test_db1                                
 DB_USER=root
 DB_PASSWORD=123456
 DB_CHARSET=utf8mb4
-LOG_DIR=/home/logs/python/
+LOG_DIR=/home/logs/python/                      #open sql log
 
 [test_db2]
 DB_HOST=127.0.0.1
@@ -66,7 +66,7 @@ DB_NAME=test_db2
 DB_USER=root
 DB_PASSWORD=123456
 DB_CHARSET=utf8mb4
-LOG_DIR=/home/logs/python/
+#LOG_DIR=/home/logs/python/                     #close sql log
 ```
 
 ## Create Model
@@ -78,12 +78,12 @@ Create your Model extend DBModel as follows:
 from hangsql.DBModel import DBModel
 
 class ModelDemo(DBModel):
-    __basepath__ = '/home/project/'             # 项目根目录 (.env文件路径:/home/project/.env)
-    #__database__ = 'default'                   # 库名
-    __tablename__ = 'lh_test'                   # 表名
-    __create_time__ = 'create_time'             # 插入时间字段 如果该字段为None create_time则不会自动添加 默认值当前时间戳(单位:秒)
-    __update_time__ = 'update_time'             # 更新时间字段 如果该字段为None update_time则不会自动添加 默认值当前时间戳(单位:秒)
-    columns = [                                 # 数据库字段
+    __basepath__ = '/home/project/'             # .env file path
+    #__database__ = 'default'                   # database
+    __tablename__ = 'lh_test'                   # table name
+    __create_time__ = 'create_time'             # it will be ignore if set None(default value: int(time.time()))
+    __update_time__ = 'update_time'             # it will be ignore if set None(default value: int(time.time()))
+    columns = [                                 # table columns
         'id',
         'name',
         'token_name',
@@ -92,7 +92,7 @@ class ModelDemo(DBModel):
         'update_time',
     ]
 
-    # 获取时间格式(如果想修改create_time, update_time 时间格式，重写该方法即可)
+    # set time format of create_time and update_time 
     # def fresh_timestamp(self):
     #     return datetime.datetime.now().strftime("%Y%m%d")
 ```
@@ -253,27 +253,21 @@ data = ModelDemo().transaction(demo)
 ```
 
 # Database
-``` python
-使用.env中默认的default数据库:
-    不设置ModelDemo类中的__database__属性 或者 在ModelDemo类中设置__database__='default'
-使用.env中test_db2数据库:
-    在ModelDemo类中设置__database__='test_db2'
 
-代码中动态设置数据库:
+``` python
+set ModelDemo attribute as follow:
+__database__ = 'test_db2'
+
+set database in your code:
 ModelDemo().database('test_db2').where('id', '>', 40).first()
 ```
 
 # Log
 ``` python
-开启:
-    在.env中配置LOG_DIR:
-    LOG_DIR=你的日志路径
-    例如LOG_DIR=/home/logs/python/  就是把日志记录在/home/logs/python/20190520.log文件中(每天产生一个文件)
-关闭:
-    在.env中配置中删除LOG_DIR配置
-    在.env中配置中注释掉LOG_DIR配置(前加#号)， 例如: #LOG_DIR=/home/logs/python/
+set LOG_DIR in your .env file:
+LOG_DIR=/home/logs/python/
 ```
 
 ## Authors
 
-* ** -- ** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+* ** jeanku ** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
