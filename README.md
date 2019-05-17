@@ -1,13 +1,34 @@
-# hangsql orm
+# hangsql
 
 A lightweight mysql orm based on pymysql
 
+## Sample Code
 
-## Getting Started
+```python
+ModelDemo().where('id', 4).where('name', 'like', '%test%').select('id', 'name', 'create_time').take(5).get()
+```
 
-First you need to create a .env file at your project root path (/home/project/.env), and content as follows:
+# Content
+
+- [Installation](#installing)
+- [Initialization](#initialization)
+- [Usage](#usage)
+    - [Create Model](##model)
+- [FAQ](#faq)
+- [To Do](#to-do)
+
+
+# Installation
 
 ```
+pip install hangsql
+```
+
+# Initialization
+
+you need to create a .env file at your project root path, and content as follows:
+
+``` python
 [default]
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -26,31 +47,12 @@ DB_PASSWORD=123456
 DB_CHARSET=utf8mb4
 LOG_DIR=/home/logs/python/
 ```
+# Usage
 
-### Installing
-
-```
-pip install hangsql
-```
-
-## Source Code
-
-### The Meat
-
-* [Model Demo](https://github.com/jeanku/hangsql/blob/master/tests/ModelDemo.py)
-
-
-## Authors
-
-* ** -- ** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
-
-
-```
-
-## Create Model
+## Model
 Create your Model extend DBModel as follows:
 
-``` bash
+``` python
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 from hangsql.DBModel import DBModel
@@ -75,7 +77,22 @@ class ModelDemo(DBModel):
     #     return datetime.datetime.now().strftime("%Y%m%d")
 ```
 
-## Usage
+
+## Source Code
+
+### The Meat
+
+* [Model Demo](https://github.com/jeanku/hangsql/blob/master/tests/ModelDemo.py)
+
+
+## Authors
+
+* ** -- ** - *Initial work* - [PurpleBooth](https://github.com/PurpleBooth)
+
+
+
+
+
 # create
 ``` bash
 #单个添加
