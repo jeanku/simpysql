@@ -5,7 +5,7 @@ A lightweight mysql orm based on pymysql
 ## Sample Code
 
 ```python
-ModelDemo().where('id', 4).where('name', 'like', '%test%').select('id', 'name', 'create_time').take(5).get()
+ModelDemo().where('id', 4).select('id', 'name').take(5).get()
 ```
 
 # Content
@@ -14,6 +14,12 @@ ModelDemo().where('id', 4).where('name', 'like', '%test%').select('id', 'name', 
 - [Initialization](#initialization)
 - [Usage](#usage)
     - [Create Model](##model)
+    - [Create](##create)
+    - [Update](##update)
+    - [Delete](##delete)
+    - [Select](##select)
+     - [Single Select](##select)
+     - [Multi Select](##select)
 - [FAQ](#faq)
 - [To Do](#to-do)
 
@@ -78,11 +84,6 @@ class ModelDemo(DBModel):
 ```
 
 
-## Source Code
-
-### The Meat
-
-* [Model Demo](https://github.com/jeanku/hangsql/blob/master/tests/ModelDemo.py)
 
 
 ## Authors
@@ -93,7 +94,7 @@ class ModelDemo(DBModel):
 
 
 
-# create
+# Create
 ``` bash
 #单个添加
 ModelDemo().create({'name': "haha1", 'token_name': 'haha124'})
