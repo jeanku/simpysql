@@ -31,9 +31,12 @@ ModelDemo().where('id', 4).select('id', 'name').take(5).get()
     - [Select Offset](#select-offset)
     - [Select Columns](#select-columns)
     - [Select Groupby](#select-groupby)
-    - [Original SQL](#select-original-sql)
-- [FAQ](#faq)
-- [To Do](#to-do)
+    - [Original SQL](#original-sql)
+    - [Response](#response)
+- [Transaction](#transaction)
+- [Database](#database)
+- [Log](#log)
+- [Authors](#authors)
 
 
 # Installation
@@ -226,29 +229,31 @@ data = ModelDemo().select('count(*) as num', 'name').groupby('name').get()
 ```
 
 ### Original SQL
-``` bash
+``` python
 sql = 'select count(*) as num,name from lh_test group by name'
 data = ModelDemo().execute(sql)
 ```
 
-# 返回结果
-``` bash
+# Response
+``` python
+data = ModelDemo().where('id', '=', 1).select('id').first()                             # {'id':1}
+data = ModelDemo().where('id', '=', 1).select('id').get()                               # [{'id':1}]
 data = ModelDemo().where('id', 'in', [1,2,3]).select('id', 'name').lists('id')          # [1,2,3]
 data = ModelDemo().where('id', 'in', [1,2]).select('id', 'name').lists(['id', 'name'])  # [[1,'name1'],[2,'name2']]
-data = ModelDemo().select('id', 'name', 'status').data()                                # 返回pandas DataFrame
+data = ModelDemo().select('id', 'name', 'status').data()                                # return pandas DataFrame
 ```
 
-# 事务
-``` bash
-def demo():       #事务闭包
+# Transaction
+``` python
+def demo():
     ModelDemo().where('id', 42).update({'name': "44", 'token_name': '444'})
     ModelDemo().where('id', 43).update({'name': "44", 'token_name': '444'})
     return True
 data = ModelDemo().transaction(demo)
 ```
 
-# 切换数据库
-``` bash
+# Database
+``` python
 使用.env中默认的default数据库:
     不设置ModelDemo类中的__database__属性 或者 在ModelDemo类中设置__database__='default'
 使用.env中test_db2数据库:
@@ -258,8 +263,8 @@ data = ModelDemo().transaction(demo)
 ModelDemo().database('test_db2').where('id', '>', 40).first()
 ```
 
-# 数据库日志
-``` bash
+# Log
+``` python
 开启:
     在.env中配置LOG_DIR:
     LOG_DIR=你的日志路径
@@ -268,10 +273,6 @@ ModelDemo().database('test_db2').where('id', '>', 40).first()
     在.env中配置中删除LOG_DIR配置
     在.env中配置中注释掉LOG_DIR配置(前加#号)， 例如: #LOG_DIR=/home/logs/python/
 ```
-
-
-
-
 
 ## Authors
 
