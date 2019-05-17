@@ -10,13 +10,13 @@ ModelDemo().where('id', 4).select('id', 'name').take(5).get()
 
 # Content
 
-- [Installation](#installing)
+- [Installation](#installation)
 - [Initialization](#initialization)
 - [Create Model](#create-model)
 - [Create](#create)
-    - [One Data](##one-data)
-    - [Multi Data](##multi-data)
-    - [Get Lastid](##get-lastid)
+    - [One Data](#one-data)
+    - [Multi Data](#multi-data)
+    - [Get Lastid](#get-lastid)
 - [FAQ](#faq)
 - [To Do](#to-do)
 
