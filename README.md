@@ -22,6 +22,16 @@ ModelDemo().where('id', 4).select('id', 'name').take(5).get()
     - [Increament](#increament)
     - [Decreament](#decreament)
 - [Delete](#delete)
+- [Select](#select)
+    - [Select One Data](#select-one-data)
+    - [Select Multi Data](#select-multi-data)
+    - [Select Condition](#select-condition)
+    - [Select Multi Condition](#select-multi-condition)
+    - [Select Order](#select-order)
+    - [Select Offset](#select-offset)
+    - [Select Columns](#select-columns)
+    - [Select Groupby](#select-groupby)
+    - [Original SQL](#select-original-sql)
 - [FAQ](#faq)
 - [To Do](#to-do)
 
@@ -122,116 +132,100 @@ ModelDemo().where('id', 1).decrement('status', 5)     #status decrement by 5
 ```
 
 # Delete
-``` bash
+``` python
 ModelDemo().where('id', 4).delete()
 ```
 
 ## Select
 
-#单个查询
-``` bash
-# 对应sql: select * from lh_test where id = 4 limit 1
+### Select One Data
+``` python
+# sql: select * from lh_test where id = 4 limit 1
 data = ModelDemo().where('id', 4).first()
 data = ModelDemo().where('id', '=', 4).first()
-
-# 对应sql: select * from lh_test where id > 4 limit 1
-data = ModelDemo().where('id', '>', 4).first()
-
-单个查询返回格式: {...}
+return data: {'id':1, 'name':...}
 ```
 
-#多个查询
-``` bash
-# 对应sql: select * from lh_test where id >= 4
+### Select Multi Data
+``` python
+# sql: select * from lh_test where id > 4 limit 5
+data = ModelDemo().where('id', '>', 4).take(5).get()
+return data: [{'id':1, 'name':...},{}...]
+```
+
+### Select Condition
+``` python
+# sql: select * from lh_test where id >= 4
 data = ModelDemo().where('id', '>=', 4).get()
 
-# 对应sql: select * from lh_test where id > 4
+# sql: select * from lh_test where id > 4
 data = ModelDemo().where('id', '>', 4).get()
 
-# 对应sql: select * from lh_test where id < 4
+# sql: select * from lh_test where id < 4
 data = ModelDemo().where('id', '<', 4).get()
 
-# 对应sql: select * from lh_test where id <= 4
+# sql: select * from lh_test where id <= 4
 data = ModelDemo().where('id', '<=', 4).get()
 
-# 对应sql: select * from lh_test where id != 4
+# sql: select * from lh_test where id != 4
 data = ModelDemo().where('id', '!=', 4).get()
 
-# 对应sql: select * from lh_test where id in (1,2)
+# sql: select * from lh_test where id in (1,2)
 data = ModelDemo().where('id', 'in', [1, 2]).get()
 
-# 对应sql: select * from lh_test where id not in (1,2)
+# sql: select * from lh_test where id not in (1,2)
 data = ModelDemo().where('id', 'not in', [1, 2]).get()
 
-# 对应sql: select * from lh_test where id between (1,2)
+# sql: select * from lh_test where id between (1,2)
 data = ModelDemo().where('id', 'between', [1, 2]).get()
 
-# 对应sql: select * from lh_test where id not between (1,2)
+# sql: select * from lh_test where id not between (1,2)
 data = ModelDemo().where('id', 'not between', [1, 2]).get()
 
-# 对应sql: select * from lh_test where name like '%Tether%'
+# sql: select * from lh_test where name like '%Tether%'
 data = ModelDemo().where('name', 'like', '%Tether%').get()
 
-# 对应sql: select * from lh_test where name not like '%Tether%'
+# sql: select * from lh_test where name not like '%Tether%'
 data = ModelDemo().where('name', 'not like', '%Tether%').get()
-
-多个查询返回格式: [{...}, {...}, {...}...]
 ```
 
-# 多条件查询
-``` bash
-#对应sql:select * from lh_test where id=1 and name='hehe'
+### Select Multi Condition
+``` python
+# sql:select * from lh_test where id=1 and name='hehe'
 data = ModelDemo().where({'id': 1, 'name': 'hehe'}).get()
-data = ModelDemo().where('id', 1).where('name', 'hehe').get()
-```
-# 排序
-``` bash
-#正序
-#对应sql: select * from lh_test where id > 0 order by id
-data = ModelDemo().where('id', '>', 0).orderby('id').get()
-data = ModelDemo().where('id', '>', 0).orderby('id', 'asc').get()
 
-#倒序
-#对应sql: select * from lh_test where id > 0 order by id desc
-data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').get()
-
-#多字段排序
-#对应sql: select * from lh_test where `id` > 0 order by `id` desc,`status`
-data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').orderby('status', 'asc').get()
+# sql:select * from lh_test where id=1 and name like 'hehe%'
+data = ModelDemo().where('id', 1).where('name', 'like', 'hehe%').get()
 ```
 
-# 取数量
-``` bash
-# 对应sql: select * from lh_test where id > 0 limit 1
-data = ModelDemo().where('id', '>', 0).first()         #返回字典
-data = ModelDemo().where('id', '>', 0).take(1).get()   #返回列表
-
-# 对应sql: select * from lh_test where id > 0 limit 5
-data = ModelDemo().where('id', '>', 0).take(5).get()
+### Select Order
+``` python
+# sql: select * from lh_test where `id` > 0 order by `id` desc,`status`
+data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').orderby('status').get()
 ```
 
-# 偏移量
-``` bash
-# 对应sql: select * from lh_test where id > 100 limit 5 offset 10
+### Select Offset
+``` python
+# sql: select * from lh_test where id > 100 limit 5 offset 10
 data = ModelDemo().where('id', '>', 100).offset(10).take(5).get()
 ```
 
-# 检索字段
-``` bash
-# 对应sql: select `id`,`name` from lh_test limit 5
+### Search Colums
+``` python
+# sql: select `id`,`name` from lh_test limit 5
 data = ModelDemo().select('id', 'name').take(5).get()
 
 # 对应sql: select min(id) as minid from lh_test limit 1
 data = ModelDemo().select('min(id) as minid').first()
 ```
 
-# groupby
-``` bash
-# 对应sql: select count(*) as num,`name` from lh_test group by `name`
+### Select Groupby
+``` python
+# sql: select count(*) as num,`name` from lh_test group by `name`
 data = ModelDemo().select('count(*) as num', 'name').groupby('name').get()
 ```
 
-# 原生sql
+### Original SQL
 ``` bash
 sql = 'select count(*) as num,name from lh_test group by name'
 data = ModelDemo().execute(sql)
