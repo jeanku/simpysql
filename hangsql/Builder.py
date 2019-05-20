@@ -263,8 +263,7 @@ class Builder(object):
                             subsql.append('{}={}'.format(expression.format_sql_column(items[0]), expression.format_str_with_quote(items[1])))
                         if len(items) == 3:
                             subsql.append('{} {} {}'.format(expression.format_sql_column(items[0]), items[1], expression.format_str_with_quote(items[2])))
-                    sqlstr.append(' and '.join(subsql))
-
+                    sqlstr.append('({})'.format(' and '.join(subsql)))
                 else:
                     raise Exception('undefined query condition {}'.format(index.__str__()))
             if len(self.__where__) > 0:
