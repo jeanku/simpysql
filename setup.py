@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="hangsql",
-    version="1.0.8",
+    version="1.0.9",
     author="jeanku",
     author_email="",
     description="A simple mysql orm base on pymysql",
