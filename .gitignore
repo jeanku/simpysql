@@ -1,8 +1,6 @@
 .DS_Store
 .idea/
-setup.py
 .env
-LICENSE
 build/
 dist/
 hangsql.egg-info/

@@ -11,7 +11,6 @@ from tests.BaseModel import BaseModel
 class ModelDemo(BaseModel):
 
     __tablename__ = 'lh_test'                   # 表名
-    __database__ = None
 
     __create_time__ = 'create_time'             # 插入时间字段 如果该字段为None create_time则不会自动添加
 
@@ -108,21 +107,11 @@ if __name__ == '__main__':
 
     # data = ModelDemo().database('icoape').where('id', '>', 40).first()
     # print(data)
-    # data = ModelDemo().orwhere('name', 'like', 1).orwhere('id', '=', 2).orwhere({'name':3, 'age':25}).orwhere(
-    #     [
-    #         ('age', '>', 15),
-    #         ['name', 'like', '%hgge%'],
-    #         ['create_time', '<', 1555123],
-    #     ]
-    # ).first()
+    data = ModelDemo().where('id', 62).orwhere({'name': 'haha'}).get()
 
-    # data = ModelDemo().where('id', 1001).orwhere('name', 'like', 'haha').orwhere([
-    #         ('age', '>', 15),
-    #         ['name', 'like', '%hgge%'],
-    #         ['create_time', '<', 1555123],
-    #  ]).first()
+    data = ModelDemo().where('id', 42).orwhere([['name', 'like', 'haha%'], ['token_name', '444444']]).get()
     # print(ModelDemo().lock_for_update().first())
     # print(ModelDemo().lock_for_share().first())
-    # print(data)
+    print(data)
 
     pass
