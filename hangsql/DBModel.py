@@ -31,7 +31,7 @@ class DBModel():
         return cls.__new__(cls).transaction_wrapper(callback)
 
     def __new__(cls, *args, **kwargs):
-        if hasattr(cls, '__database__'):
+        if hasattr(cls, '__database__') and cls.__basepath__ is not None:
             connection.set_config(cls.__basepath__, cls.__database__)
         else:
             connection.set_config(cls.__basepath__)

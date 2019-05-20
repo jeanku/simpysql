@@ -169,8 +169,6 @@ class Builder(object):
         subsql = ''.join(
             [self._compile_where(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(), self._compile_limit(),
              self._compile_offset(), self._compile_lock()])
-        print("select {} from {}{}".format(','.join(self.__select__), self._tablename(), subsql))
-        exit(0)
         return "select {} from {}{}".format(','.join(self.__select__), self._tablename(), subsql)
 
     def _compile_create(self, data):
@@ -271,7 +269,7 @@ class Builder(object):
                     raise Exception('undefined query condition {}'.format(index.__str__()))
             if len(self.__where__) > 0:
                 return ' or {}'.format(' or '.join(sqlstr))
-            return ' {}'.format(' or '.join(sqlstr))
+            return ' where {}'.format(' or '.join(sqlstr))
         return ''
 
     def _get_connection(self):
