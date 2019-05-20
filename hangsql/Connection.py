@@ -53,7 +53,7 @@ class Connection(object):
     def connect(self):
         if self._connection.get(self._database, None) is None:
             pro_db_config = self.config()
-            self._connection[self._database] = Connectionpool.connection(pro_db_config)
+            self._connection[self._database] = Connectionpool.connection(pro_db_config,self._database)
         return self._connection[self._database]
 
     def set_config(self, path, database='default'):
