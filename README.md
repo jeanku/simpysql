@@ -191,6 +191,9 @@ data = ModelDemo().where('name', 'like', '%Tether%').get()
 # sql: select * from lh_test where name not like '%Tether%'
 data = ModelDemo().where('name', 'not like', '%Tether%').get()
 
+# sql: select * from lh_test where `id`=62 or `name`='haha'
+data = ModelDemo().where('id', 62).orwhere('name', 'haha').get()
+
 # sql: select * from lh_test where `id`=62 or `name` like 'haha%'
 data = ModelDemo().where('id', 62).orwhere('name', 'like', 'haha%').get()
 
