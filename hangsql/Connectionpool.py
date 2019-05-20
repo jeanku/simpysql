@@ -31,4 +31,4 @@ class Connectionpool():
         return self._pool[database].connection()
 
 
-Connectionpool = Connectionpool()
+connectionpool = Connectionpool()
