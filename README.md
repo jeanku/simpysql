@@ -42,7 +42,7 @@ ModelDemo().where('id', 4).select('id', 'name').take(5).get()
 # Installation
 
 ```
-pip install hangsql
+pip install simpysql
 ```
 
 # Initialization

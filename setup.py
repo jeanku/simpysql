@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="simpysql",
-    version="1.0.9",
+    version="0.0.5",
     author="jeanku",
     author_email="",
     description="A simple mysql orm base on pymysql",
@@ -22,6 +22,7 @@ setuptools.setup(
         'pymysql',
         'pandas',
         'configparser',
+        'DBUtils',
     ],
     entry_points={
         "console_scripts": ['simpysql = DBModel:DBModel']
@@ -29,8 +30,3 @@ setuptools.setup(
     keywords='MySQL ORM',
     python_requires='>=3',
 )
-
-'''
-step1: python3 setup.py sdist bdist_wheel
-step2: python3 -m twine upload dist/*
-'''
