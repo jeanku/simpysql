@@ -1,4 +1,4 @@
-# hangsql
+# simpysql
 
 A lightweight mysql orm based on pymysql
 
@@ -75,7 +75,7 @@ Create your Model extend DBModel as follows:
 ``` python
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
-from hangsql.DBModel import DBModel
+from simpysql.DBModel import DBModel
 
 class ModelDemo(DBModel):
     __basepath__ = '/home/project/'             # .env file path

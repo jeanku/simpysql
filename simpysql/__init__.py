@@ -1,4 +1,4 @@
-name = "hangsql"
+name = "simpysql"
 from .DBModel import DBModel
 
 __all__ = [

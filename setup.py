@@ -4,7 +4,7 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="hangsql",
+    name="simpysql",
     version="1.0.9",
     author="jeanku",
     author_email="",
@@ -12,7 +12,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="",
-    packages=["hangsql"],
+    packages=["simpysql"],
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
@@ -24,7 +24,7 @@ setuptools.setup(
         'configparser',
     ],
     entry_points={
-        "console_scripts": ['hangsql = DBModel:DBModel']
+        "console_scripts": ['simpysql = DBModel:DBModel']
     },
     keywords='MySQL ORM',
     python_requires='>=3',
