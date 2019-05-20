@@ -146,14 +146,14 @@ ModelDemo().where('id', 4).delete()
 # sql: select * from lh_test where id = 4 limit 1
 data = ModelDemo().where('id', 4).first()
 data = ModelDemo().where('id', '=', 4).first()
-return data: {'id':1, 'name':...}
+return data: {'id':4, 'name':...}
 ```
 
 ### Select Multi Data
 ``` python
 # sql: select * from lh_test where id > 4 limit 5
 data = ModelDemo().where('id', '>', 4).take(5).get()
-return data: [{'id':1, 'name':...},{}...]
+return data: [{'id':5, 'name':...},{}...]
 ```
 
 ### Select Condition
@@ -253,19 +253,11 @@ data = ModelDemo().transaction(demo)
 ```
 
 # Database
-<<<<<<< HEAD
 
 ``` python
 set ModelDemo attribute as follow:
 __database__ = 'test_db2'
 
-=======
-
-``` python
-set ModelDemo attribute as follow:
-__database__ = 'test_db2'
-
->>>>>>> c4aa1d360a5cdbdb80c43982aa4756f3c6ba0f4b
 set database in your code:
 ModelDemo().database('test_db2').where('id', '>', 40).first()
 ```
@@ -274,8 +266,4 @@ ModelDemo().database('test_db2').where('id', '>', 40).first()
 ``` python
 set LOG_DIR in your .env file:
 LOG_DIR=/home/logs/python/
-<<<<<<< HEAD
 ```
-=======
-```
->>>>>>> c4aa1d360a5cdbdb80c43982aa4756f3c6ba0f4b
