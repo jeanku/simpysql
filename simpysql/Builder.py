@@ -5,9 +5,9 @@ import collections
 from pymysql.cursors import SSCursor, DictCursor, SSDictCursor
 from .Expression import expression
 from .Response import Response
+from .BaseBuilder import BaseBuilder
 
-
-class Builder(object):
+class Builder(BaseBuilder):
     operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',
         'like', 'like binary', 'not like', 'between', 'ilike',
@@ -110,6 +110,9 @@ class Builder(object):
             raise Exception('offset number invalid')
         self.__offset__ = int(number)
         return self
+
+    def tosql(self):
+        return self._compile_select()
 
     def where(self, *args):
         length = args.__len__()
@@ -226,8 +229,7 @@ class Builder(object):
                 if index in self.operators:
                     if index in ['in', 'not in'] and isinstance(values, dict):
                         for key, value in values.items():
-                            sqlstr.append('{} {} {}'.format(expression.format_sql_column(key), index,
-                                                            expression.list_to_str(value)))
+                            sqlstr.append('{} {} {}'.format(expression.format_sql_column(key), index, expression.list_to_str(value)))
                     elif index in ['between', 'not between'] and isinstance(values, dict):
                         for key, value in values.items():
                             if isinstance(value, list) and len(value) == 2:

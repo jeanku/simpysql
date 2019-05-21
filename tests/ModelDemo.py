@@ -107,11 +107,15 @@ if __name__ == '__main__':
 
     # data = ModelDemo().database('icoape').where('id', '>', 40).first()
     # print(data)
-    data = ModelDemo().where('id', 62).orwhere({'name': 'haha'}).get()
+    # data = ModelDemo().where('id', 62).orwhere({'name': 'haha'}).get()
 
-    data = ModelDemo().where('id', 42).orwhere([['name', 'like', 'haha%'], ['token_name', '444444']]).get()
+    # data = ModelDemo().where('id', 42).orwhere([['name', 'like', 'haha%'], ['token_name', '444444']]).get()
     # print(ModelDemo().lock_for_update().first())
-    # print(ModelDemo().lock_for_share().first())
-    print(data)
+    print(ModelDemo().first())
+    # print(ModelDemo().select('id').take(1).lists('id'))
+    # data = ModelDemo().where('id', 'in', ModelDemo().select('id').take(1)).first()
+
+    # data = ModelDemo('a').leftjoin('table1 as b', 'a.id', '=', ModelDemo.__tablename__ + ".id").select('*').get()
+    # print(data)
 
     pass
