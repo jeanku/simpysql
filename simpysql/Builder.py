@@ -29,8 +29,9 @@ class Builder(BaseBuilder):
         self.__offset__ = None                      # offset
         self.__lock__ = None                        # lock
         self.__join__ = []                          # leftjoin
-        self.__union__ = []                         # union
+        self.__union__ = []                         # union & unionall
         self.__on__ = []                            # leftjoin
+        self.__having__ = None                      # having
 
     def first(self):
         self.__limit__ = 1
@@ -166,6 +167,10 @@ class Builder(BaseBuilder):
     def execute(self, sql):
         return self._get_connection().execute(sql)
 
+    def having(self, column1, operator, column2):
+        self.__having__ = ' having {} {} {}'.format(column1, operator, column2)
+        return self
+
     def lock_for_update(self):
         self.__lock__ = ' for update'
         return self
@@ -190,7 +195,11 @@ class Builder(BaseBuilder):
         return self
 
     def union(self, model):
-        self.__union__.append(model)
+        self.__union__.append(('union', model))
+        return self
+
+    def unionall(self, model):
+        self.__union__.append(('union all', model))
         return self
 
     def on(self, column1, operator, column2):
@@ -200,11 +209,11 @@ class Builder(BaseBuilder):
     def _compile_select(self):
         subsql = ''.join(
             [self._compile_where(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(), self._compile_limit(),
-             self._compile_offset(), self._compile_lock()])
+             self._compile_offset(), self._compile_lock(), self._compile_having()])
         joinsql = ''.join(self._compile_leftjoin())
         returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(),joinsql, subsql)
         if self.__union__:
-            return '({})'.format(returnsql) + ' union ' + self._compile_union()
+            return '({})'.format(returnsql) + self._compile_union()
         return returnsql
 
     def _compile_create(self, data):
@@ -262,13 +271,17 @@ class Builder(BaseBuilder):
 
     def _compile_union(self):
         if self.__union__:
-            return ' union '.join(['({})'.format(index.tosql()) for index in self.__union__])
+            return ' ' + ' '.join(['{} ({})'.format(index, value.tosql()) for (index, value) in self.__union__])
         return ''
 
     def _compile_on(self):
         sqlstr = ['{} {} {}'.format(index[0], index[1],index[2]) for index in self.__on__]
         return ' and '.join(sqlstr)
 
+    def _compile_having(self):
+        if self.__having__:
+            return self.__having__
+        return ''
     def _compile_where(self):
         if len(self.__where__) > 0:
             sqlstr = []

@@ -86,7 +86,8 @@ if __name__ == '__main__':
 
     # groupby
     # select count(*) as num,`name` from lh_test group by `name`
-    # data = ModelDemo().select('count(*) as num', 'name').groupby('name').get()
+    # data = ModelDemo().select('count(*) as num', 'name').groupby('name').having('num', '>', 2).get()
+    # data = ModelDemo().select('distinct(id) as id').lists('id')
 
     # 原生sql
     # data = ModelDemo().execute('select count(*) as num,`name` from lh_test group by `name`')
@@ -110,10 +111,16 @@ if __name__ == '__main__':
     # print(ModelDemo().lock_for_update().first())
     # print(ModelDemo('a').select('a.id', 'a.name').first())
     # print(ModelDemo('a').select('a.id').take(1).lists('id'))
-    # data = ModelDemo('a').where('id', 'in', ModelDemo().select('id')).first()
+    # data = ModelDemo('a').where('id', 'in', ModelDemo().where('id', '<=', 50).select('id')).get()
 
-    data = ModelDemo('a').where('a.id', '<=', 42).select('a.id', 'b.name').leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')) \
-        .union(ModelDemo().where('id', '>', 57).select('id', 'name').orderby('id', 'desc').take(5)).take(5).get()
+    # data = ModelDemo('a').where('a.id', 42).innerjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
+
+    data = ModelDemo().where('id', 42).union(ModelDemo().where('id', '=', 58)).get()
+
+    # data = ModelDemo('a').where('a.id', '<=', 42).select('a.id', 'b.name').leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')) \
+    #     .unionall(ModelDemo().where('id', '=', 58).select('id', 'name').orderby('id', 'desc'))\
+    #     .take(5).get()
+
     # print(data)
     # def change(string):
     #     list_str = string.split('.', 1)
