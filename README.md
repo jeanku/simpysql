@@ -1,4 +1,4 @@
-# simpysql
+# SimpySql
 
 A lightweight mysql orm based on pymysql
 

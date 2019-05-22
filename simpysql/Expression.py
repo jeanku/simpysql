@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-# from .Builder import Builder
-# from .Builder import Builder
-
 from .BaseBuilder import BaseBuilder
 
 class Expression(object):
 
     def format_sql_column(self, key):
-        if isinstance(key, str):
-            return '`{}`'.format(key)
-        return ''
+        list_str = key.split('.', 1)
+        return '.'.join(["`{}`".format(i) if i == list_str[-1] else i for i in list_str])
 
     def format_str_with_quote(self, key):
         if isinstance(key, str):
