@@ -7,6 +7,7 @@ A lightweight mysql orm based on pymysql
 ```python
 ModelDemo().where('id', 4).select('id', 'name').take(5).get()
 ```
+[中文文档](https://github.com/jeanku/simpysql/blob/master/README_cn.md)
 
 # Content
 
