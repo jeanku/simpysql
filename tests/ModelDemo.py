@@ -5,18 +5,17 @@
 
 __author__ = ''
 
-
 from tests.BaseModel import BaseModel
 
+
 class ModelDemo(BaseModel):
+    __tablename__ = 'lh_test'  # 表名
 
-    __tablename__ = 'lh_test'                   # 表名
+    __create_time__ = 'create_time'  # 插入时间字段 如果该字段为None create_time则不会自动添加
 
-    __create_time__ = 'create_time'             # 插入时间字段 如果该字段为None create_time则不会自动添加
+    __update_time__ = 'update_time'  # 更新时间字段 如果该字段为None create_time则不会自动添加
 
-    __update_time__ = 'update_time'             # 更新时间字段 如果该字段为None create_time则不会自动添加
-
-    columns = [                                 # 数据库字段
+    columns = [  # 数据库字段
         'id',
         'name',
         'token_name',
@@ -24,7 +23,6 @@ class ModelDemo(BaseModel):
         'create_time',
         'update_time',
     ]
-
 
 
 if __name__ == '__main__':
@@ -41,7 +39,6 @@ if __name__ == '__main__':
 
     # 删除
     # data = ModelDemo().where('id', 4).delete()
-
     # 查询[精确查询]
     # data = ModelDemo().where('id', '>', 1).first()
     # data = ModelDemo().where('id', '=', 21026).first()
@@ -89,7 +86,8 @@ if __name__ == '__main__':
 
     # groupby
     # select count(*) as num,`name` from lh_test group by `name`
-    # data = ModelDemo().select('count(*) as num', 'name').groupby('name').get()
+    # data = ModelDemo().select('count(*) as num', 'name').groupby('name').having('num', '>', 2).get()
+    # data = ModelDemo().select('distinct(id) as id').lists('id')
 
     # 原生sql
     # data = ModelDemo().execute('select count(*) as num,`name` from lh_test group by `name`')
@@ -107,11 +105,26 @@ if __name__ == '__main__':
 
     # data = ModelDemo().database('icoape').where('id', '>', 40).first()
     # print(data)
-    data = ModelDemo().where('id', 62).orwhere({'name': 'haha'}).get()
+    # data = ModelDemo().where('id', 62).orwhere({'name': 'haha'}).get()
 
-    data = ModelDemo().where('id', 42).orwhere([['name', 'like', 'haha%'], ['token_name', '444444']]).get()
+    # data = ModelDemo().where('id', 42).orwhere([['name', 'like', 'haha%'], ['token_name', '444444']]).get()
     # print(ModelDemo().lock_for_update().first())
-    # print(ModelDemo().lock_for_share().first())
-    print(data)
+    # print(ModelDemo('a').select('a.id', 'a.name').first())
+    # print(ModelDemo('a').select('a.id').take(1).lists('id'))
+    # data = ModelDemo('a').where('id', 'in', ModelDemo().where('id', '<=', 50).select('id')).get()
 
+    # data = ModelDemo('a').where('a.id', 42).innerjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
+
+    data = ModelDemo().where('id', 42).union(ModelDemo().where('id', '=', 58)).get()
+
+    # data = ModelDemo('a').where('a.id', '<=', 42).select('a.id', 'b.name').leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')) \
+    #     .unionall(ModelDemo().where('id', '=', 58).select('id', 'name').orderby('id', 'desc'))\
+    #     .take(5).get()
+
+    # print(data)
+    # def change(string):
+    #     list_str = string.split('.', 1)
+    #     return '.'.join(["`{}`".format(i) if i == list_str[-1] else i for i in list_str])
+    #
+    print(data)
     pass

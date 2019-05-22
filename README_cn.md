@@ -1,62 +1,21 @@
+@[toc]
 # SimpySql
+基于pymysql的轻量级mysql ORM
 
-A lightweight mysql orm based on pymysql
-
-## Sample Code
-
+# 简单实例
 ```python
 ModelDemo().where('id', 4).select('id', 'name').take(5).get()
 ```
-## 中文文档
-[中文文档](https://github.com/jeanku/simpysql/blob/master/README_cn.md)
 
-# Content
-
-- [Installation](#installation)
-- [Initialization](#initialization)
-- [Create Model](#create-model)
-- [Create](#create)
-    - [One Data](#one-data)
-    - [Multi Data](#multi-data)
-    - [Get Lastid](#get-lastid)
-- [Update](#update)
-    - [Update Data](#update-data)
-    - [Increament](#increament)
-    - [Decreament](#decreament)
-- [Delete](#delete)
-- [Select](#select)
-    - [Select One Data](#select-one-data)
-    - [Select Multi Data](#select-multi-data)
-    - [Select Condition](#select-condition)
-    - [Select Multi Condition](#select-multi-condition)
-    - [Select Order](#select-order)
-    - [Select Offset](#select-offset)
-    - [Select Columns](#select-columns)
-    - [Select Groupby](#select-groupby)
-    - [Select Having](#select-having)
-    - [Select Subquery](#select-subquery)
-    - [Tablename Alias](#tablename-alias)
-    - [Select Joins](#select-joins)
-    - [Select Unions](#select-unions)
-    - [Original SQL](#original-sql)
-    - [Response](#response)
-- [Transaction](#transaction)
-- [Database](#database)
-- [Log](#log)
-- [Authors](#authors)
-
-
-# Installation
-
-```
+# 安装
+```python
 pip install simpysql
 ```
 
-# Initialization
+# 初始化
+您需要在项目根路径处创建一个.env文件，内容如下：
 
-you need to create a .env file at your project root path, and content as follows:
-
-``` python
+```python
 [default]
 DB_HOST=127.0.0.1
 DB_PORT=3306
@@ -76,21 +35,21 @@ DB_CHARSET=utf8mb4
 #LOG_DIR=/home/logs/python/                     #close sql log
 ```
 
-## Create Model
-Create your Model extend DBModel as follows:
+## 创建 Model
+创建数据库Model并继承DBModel，如下所示：
 
-``` python
+```python
 #!/usr/bin/python
 # -*- coding: UTF-8 -*-
 from simpysql.DBModel import DBModel
 
 class ModelDemo(DBModel):
-    __basepath__ = '/home/project/'             # .env file path
-    #__database__ = 'default'                   # database
-    __tablename__ = 'lh_test'                   # table name
-    __create_time__ = 'create_time'             # it will be ignore if set None(default value: int(time.time()))
-    __update_time__ = 'update_time'             # it will be ignore if set None(default value: int(time.time()))
-    columns = [                                 # table columns
+    __basepath__ = '/home/project/'             # .env文件路径
+    #__database__ = 'default'                   # 默认数据库default
+    __tablename__ = 'lh_test'                   # 表名
+    __create_time__ = 'create_time'             # 插入时间字段(没有则填None,自动填充,默认当前时间戳(秒))
+    __update_time__ = 'update_time'             # 更新时间字段(没有则填None,自动填充,默认当前时间戳(秒))
+    columns = [                                 # 数据库字段
         'id',
         'name',
         'token_name',
@@ -99,72 +58,72 @@ class ModelDemo(DBModel):
         'update_time',
     ]
 
-    # set time format of create_time and update_time
+    # 如想改写create_time & update_time默认时间格式，就重写该方法
     # def fresh_timestamp(self):
     #     return datetime.datetime.now().strftime("%Y%m%d")
 ```
 
 
-# Create
+# 数据添加
 
-## One Data
-``` python
+## 添加单条数据
+```python
 ModelDemo().create({'name': "haha1", 'token_name': 'haha124'})
 ```
 
-## Multi Data
-``` python
+## 添加多条数据
+```python
 ModelDemo().create([{'name': "haha1", 'token_name': 'haha124'}, {'name':"haha2", 'token_name': 'haha125'}])
 ```
 
-## Get Lastid
-``` python
+## 获取插入的自增ID
+```python
 id = ModelDemo().create({'name': "haha1", 'token_name': 'haha124'}).lastid()
 ```
 
-# Update
+# 更新
 
-## Update Data
-``` python
+## 更新数据
+```python
 ModelDemo().where('id', 1).update({'name':"hehe", 'token_name': 'hehe123'})
 ```
 
-## Increment
-``` python
+## 自增
+```python
 ModelDemo().where('id', 1).increment('status')        #status increment by 1
 ModelDemo().where('id', 1).increment('status', 5)     #status increment by 5
 ```
 
-## Decreament
-``` python
+## 自减
+```python
 ModelDemo().where('id', 1).decrement('status')        #status decrement by 1
 ModelDemo().where('id', 1).decrement('status', 5)     #status decrement by 5
 ```
 
-# Delete
-``` python
+# 删除
+```python
 ModelDemo().where('id', 4).delete()
 ```
 
-## Select
+## 查询
 
-### Select One Data
-``` python
+### 查询单条数据(first)
+```python
 # sql: select * from lh_test where id = 4 limit 1
 data = ModelDemo().where('id', 4).first()
 data = ModelDemo().where('id', '=', 4).first()
 return data: {'id':4, 'name':...}
 ```
 
-### Select Multi Data
-``` python
+### 查询多条数据(get)
+```python
 # sql: select * from lh_test where id > 4 limit 5
 data = ModelDemo().where('id', '>', 4).take(5).get()
 return data: [{'id':5, 'name':...},{}...]
 ```
 
-### Select Condition
-``` python
+###  条件查询
+```python
 # sql: select * from lh_test where id >= 4
 data = ModelDemo().where('id', '>=', 4).get()
 
@@ -209,8 +168,8 @@ data = ModelDemo().where('id', 62).orwhere([['name', 'like', 'haha%'], ['create_
 
 ```
 
-### Select Multi Condition
-``` python
+### 多添件查询
+```python
 # sql:select * from lh_test where id=1 and name='hehe'
 data = ModelDemo().where({'id': 1, 'name': 'hehe'}).get()
 
@@ -218,20 +177,20 @@ data = ModelDemo().where({'id': 1, 'name': 'hehe'}).get()
 data = ModelDemo().where('id', 1).where('name', 'like', 'hehe%').get()
 ```
 
-### Select Order
-``` python
+### 排序
+```python
 # sql: select * from lh_test where `id` > 0 order by `id` desc,`status`
 data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').orderby('status').get()
 ```
 
-### Select Offset
-``` python
+### 偏移
+```python
 # sql: select * from lh_test where id > 100 limit 5 offset 10
 data = ModelDemo().where('id', '>', 100).offset(10).take(5).get()
 ```
 
-### Search Colums
-``` python
+### 自定义查询字段
+```python
 # sql: select `id`,`name` from lh_test limit 5
 data = ModelDemo().select('id', 'name').take(5).get()
 
@@ -239,20 +198,20 @@ data = ModelDemo().select('id', 'name').take(5).get()
 data = ModelDemo().select('min(id) as minid').first()
 ```
 
-### Select Groupby
-``` python
+### 分组 group by
+```python
 # sql: select count(*) as num,name from lh_test group by name
 data = ModelDemo().select('count(*) as num', 'name').groupby('name').get()
 ```
 
-### Select Having
-``` python
+### Having查询
+```python
 # sql: select count(*) as num,name from lh_test group by name having num > 2
 data = ModelDemo().select('count(*) as num', 'name').groupby('name').having('num', '>', 2).get()
 ```
 
-### Select Subquery
-``` python
+### 字查询
+```python
 # sql: select * from lh_test where id=(select max(id) from lh_test) limit 1
 data = ModelDemo().where('id', ModelDemo().select('max(id)')).first()
 
@@ -260,14 +219,14 @@ data = ModelDemo().where('id', ModelDemo().select('max(id)')).first()
 data = ModelDemo().where('id', 'in', ModelDemo().where('id', '<=', 50).select('id')).get()
 ```
 
-### Tablename Alias
-``` python
+### tablename 别名
+```python
 # sql: select a.id,a.name from lh_test as a limit 1
 data = ModelDemo('a').select('a.id', 'a.name').first()
 ```
 
-### Select Joins
-``` python
+### join查询
+```python
 # 【left join】sql: select a.id,b.name from lh_test as a left join lh_test as b on a.id = b.id where a.id=42
 data = ModelDemo('a').where('a.id', 42).leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
 
@@ -278,8 +237,8 @@ data = ModelDemo('a').where('a.id', 42).rightjoin(ModelDemo('b').on('a.id', '=',
 data = ModelDemo('a').where('a.id', 42).innerjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
 ```
 
-### Select Unions
-``` python
+### Union查询
+```python
 # 【union all】sql: (select * from lh_test where id=42) union all (select * from lh_test where id=58)
 data = ModelDemo().where('id', 42).unionall(ModelDemo().where('id', '=', 58)).get()
 
@@ -287,14 +246,14 @@ data = ModelDemo().where('id', 42).unionall(ModelDemo().where('id', '=', 58)).ge
 data = ModelDemo().where('id', 42).union(ModelDemo().where('id', '=', 58)).get()
 ```
 
-### Original SQL
-``` python
+### 原生SQL
+```python
 sql = 'select count(*) as num,name from lh_test group by name'
 data = ModelDemo().execute(sql)
 ```
 
-# Response
-``` python
+# 返回数据格式
+```python
 data = ModelDemo().where('id', '=', 1).select('id').first()                             # {'id':1}
 data = ModelDemo().where('id', '=', 1).select('id').get()                               # [{'id':1}]
 data = ModelDemo().where('id', 'in', [1,2,3]).select('id', 'name').lists('id')          # [1,2,3]
@@ -302,16 +261,16 @@ data = ModelDemo().where('id', 'in', [1,2]).select('id', 'name').lists(['id', 'n
 data = ModelDemo().select('id', 'name', 'status').data()                                # return pandas DataFrame
 ```
 
-# Transaction
-``` python
-method1:
+# 数据库事务
+```python
+方法1:
 def demo():
     ModelDemo().where('id', 42).update({'name': "44", 'token_name': '444'})
     ModelDemo().where('id', 43).update({'name': "44", 'token_name': '444'})
     return True
 data = ModelDemo().transaction(demo)
 
-method2:
+方法2:
 @ModelDemo.transaction
 def demo(id):
     ModelDemo().where('id', id).update({'name': "44", 'token_name': '111'})
@@ -321,18 +280,18 @@ def demo(id):
 demo(42)
 ```
 
-# Database
+# 多库切换
 
-``` python
-set ModelDemo attribute as follow:
+```python
+在model中设置__database__属性为 .env中的数据库配置名称
 __database__ = 'test_db2'
 
-set database in your code:
+在代码中设置
 ModelDemo().database('test_db2').where('id', '>', 40).first()
 ```
 
-# Log
-``` python
-set LOG_DIR in your .env file:
+# 数据库日志
+```python
+在 .env 文件中开启LOG_DIR设置捷即可:
 LOG_DIR=/home/logs/python/
 ```

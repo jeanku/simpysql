@@ -15,6 +15,7 @@ class Connection(object):
 
     def execute(self, sql, cursorclass=None):
         self.log(sql)
+        # exit(0)
         cursor = self.connect().cursor(cursor=cursorclass)
         cursor.execute(sql)
         data = cursor.fetchall()

@@ -3,5 +3,5 @@
 .env
 build/
 dist/
-hangsql.egg-info/
-hangsql/__pycache__/*.pyc
+simpysql.egg-info/
+*.py[cod]

@@ -5,9 +5,9 @@ import collections
 from pymysql.cursors import SSCursor, DictCursor, SSDictCursor
 from .Expression import expression
 from .Response import Response
+from .BaseBuilder import BaseBuilder
 
-
-class Builder(object):
+class Builder(BaseBuilder):
     operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',
         'like', 'like binary', 'not like', 'between', 'ilike',
@@ -17,8 +17,9 @@ class Builder(object):
         'not similar to', 'not ilike', '~~*', '!~~*', 'in', 'not in', 'not between'
     ];
 
-    def __init__(self, model):
+    def __init__(self, model, alias=None):
         self.__model__ = model
+        self.__alias__ = alias
         self.__where__ = collections.defaultdict(dict)
         self.__orwhere__ = []                       # orwhere处理逻辑
         self.__select__ = []                        # 检索的字段
@@ -26,7 +27,11 @@ class Builder(object):
         self.__orderby__ = []                       # 排序字段
         self.__groupby__ = []                       # 排序字段
         self.__offset__ = None                      # offset
-        self.__lock__ = None                        # offset
+        self.__lock__ = None                        # lock
+        self.__join__ = []                          # leftjoin
+        self.__union__ = []                         # union & unionall
+        self.__on__ = []                            # leftjoin
+        self.__having__ = None                      # having
 
     def first(self):
         self.__limit__ = 1
@@ -111,6 +116,11 @@ class Builder(object):
         self.__offset__ = int(number)
         return self
 
+    def tosql(self):
+        if len(self.__select__) == 0:
+            self.__select__.append('*')
+        return self._compile_select()
+
     def where(self, *args):
         length = args.__len__()
         if length == 1 and isinstance(args[0], dict):
@@ -157,6 +167,10 @@ class Builder(object):
     def execute(self, sql):
         return self._get_connection().execute(sql)
 
+    def having(self, column1, operator, column2):
+        self.__having__ = ' having {} {} {}'.format(column1, operator, column2)
+        return self
+
     def lock_for_update(self):
         self.__lock__ = ' for update'
         return self
@@ -165,11 +179,42 @@ class Builder(object):
         self.__lock__ = ' lock in share mode'
         return self
 
+    def leftjoin(self, model):
+        self.__join__.append(('left join', model))
+        return self
+
+    def rightjoin(self, model):
+        self.__join__.append(('right join', model))
+        return self
+
+    def join(self, model):
+        return self.innerjoin(model)
+
+    def innerjoin(self, model):
+        self.__join__.append(('inner join', model))
+        return self
+
+    def union(self, model):
+        self.__union__.append(('union', model))
+        return self
+
+    def unionall(self, model):
+        self.__union__.append(('union all', model))
+        return self
+
+    def on(self, column1, operator, column2):
+        self.__on__.append((column1, operator, column2))
+        return self
+
     def _compile_select(self):
         subsql = ''.join(
             [self._compile_where(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(), self._compile_limit(),
-             self._compile_offset(), self._compile_lock()])
-        return "select {} from {}{}".format(','.join(self.__select__), self._tablename(), subsql)
+             self._compile_offset(), self._compile_lock(), self._compile_having()])
+        joinsql = ''.join(self._compile_leftjoin())
+        returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(),joinsql, subsql)
+        if self.__union__:
+            return '({})'.format(returnsql) + self._compile_union()
+        return returnsql
 
     def _compile_create(self, data):
         if isinstance(data, dict):
@@ -219,6 +264,24 @@ class Builder(object):
     def _compile_lock(self):
         return '' if self.__lock__ is None else self.__lock__
 
+    def _compile_leftjoin(self):
+        if self.__join__:
+            return ' ' + ' '.join(['{} {} on {}'.format(index, value._tablename(), value._compile_on()) for (index, value) in self.__join__])
+        return ''
+
+    def _compile_union(self):
+        if self.__union__:
+            return ' ' + ' '.join(['{} ({})'.format(index, value.tosql()) for (index, value) in self.__union__])
+        return ''
+
+    def _compile_on(self):
+        sqlstr = ['{} {} {}'.format(index[0], index[1],index[2]) for index in self.__on__]
+        return ' and '.join(sqlstr)
+
+    def _compile_having(self):
+        if self.__having__:
+            return self.__having__
+        return ''
     def _compile_where(self):
         if len(self.__where__) > 0:
             sqlstr = []
@@ -226,8 +289,7 @@ class Builder(object):
                 if index in self.operators:
                     if index in ['in', 'not in'] and isinstance(values, dict):
                         for key, value in values.items():
-                            sqlstr.append('{} {} {}'.format(expression.format_sql_column(key), index,
-                                                            expression.list_to_str(value)))
+                            sqlstr.append('{} {} {}'.format(expression.format_sql_column(key), index, expression.list_to_str(value)))
                     elif index in ['between', 'not between'] and isinstance(values, dict):
                         for key, value in values.items():
                             if isinstance(value, list) and len(value) == 2:
@@ -279,11 +341,13 @@ class Builder(object):
         return self
 
     def _tablename(self):
-        return self.__model__.__tablename__
+        if self.__alias__ is None:
+            return self.__model__.__tablename__
+        return self.__model__.__tablename__ + ' as {}'.format(self.__alias__)
+
 
     def _format_columns(self, columns):
-        return list(map(lambda index: expression.format_sql_column(index) if index in self.__model__.columns else index,
-                        columns))
+        return list(map(lambda index: expression.format_sql_column(index), columns))
 
     def _set_create_time(self, data):
         currtime = self.__model__.fresh_timestamp()

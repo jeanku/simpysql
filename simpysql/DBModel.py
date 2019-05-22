@@ -35,5 +35,7 @@ class DBModel():
             connection.set_config(cls.__basepath__, cls.__database__)
         else:
             connection.set_config(cls.__basepath__)
-        return Builder(super(DBModel, cls).__new__(cls, *args, **kwargs))
+        if len(args) > 0 and isinstance(args[0], str):
+            return Builder(super(DBModel, cls).__new__(cls), alias=args[0])
+        return Builder(super(DBModel, cls).__new__(cls))
 
