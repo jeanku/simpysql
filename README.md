@@ -31,6 +31,11 @@ ModelDemo().where('id', 4).select('id', 'name').take(5).get()
     - [Select Offset](#select-offset)
     - [Select Columns](#select-columns)
     - [Select Groupby](#select-groupby)
+    - [Select Having](#select-having)
+    - [Select Subquery](#select-subquery)
+    - [Tablename Alias](#tablename-alias)
+    - [Select Joins](#select-joins)
+    - [Select Unions](#select-unions)
     - [Original SQL](#original-sql)
     - [Response](#response)
 - [Transaction](#transaction)
@@ -234,8 +239,50 @@ data = ModelDemo().select('min(id) as minid').first()
 
 ### Select Groupby
 ``` python
-# sql: select count(*) as num,`name` from lh_test group by `name`
+# sql: select count(*) as num,name from lh_test group by name
 data = ModelDemo().select('count(*) as num', 'name').groupby('name').get()
+```
+
+### Select Having
+``` python
+# sql: select count(*) as num,name from lh_test group by name having num > 2
+data = ModelDemo().select('count(*) as num', 'name').groupby('name').having('num', '>', 2).get()
+```
+
+### Select Subquery
+``` python
+# sql: select * from lh_test where id=(select max(id) from lh_test) limit 1
+data = ModelDemo().where('id', ModelDemo().select('max(id)')).first()
+
+# sql:select * from lh_test where id in (select max(id) from lh_test where id <= 50)
+data = ModelDemo().where('id', 'in', ModelDemo().where('id', '<=', 50).select('id')).get()
+```
+
+### Tablename Alias
+``` python
+# sql: select a.id,a.name from lh_test as a limit 1
+data = ModelDemo('a').select('a.id', 'a.name').first()
+```
+
+### Select Joins
+``` python
+# 【left join】sql: select a.id,b.name from lh_test as a left join lh_test as b on a.id = b.id where a.id=42
+data = ModelDemo('a').where('a.id', 42).leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
+
+# 【left join】sql: select a.id,b.name from lh_test as a right join lh_test as b on a.id = b.id where a.id=42
+data = ModelDemo('a').where('a.id', 42).rightjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
+
+# 【inner join】sql: select a.id,b.name from lh_test as a inner join lh_test as b on a.id = b.id where a.id=42
+data = ModelDemo('a').where('a.id', 42).innerjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
+```
+
+### Select Unions
+``` python
+# 【union all】sql: (select * from lh_test where id=42) union all (select * from lh_test where id=58)
+data = ModelDemo().where('id', 42).unionall(ModelDemo().where('id', '=', 58)).get()
+
+# 【union】sql: (select * from lh_test where id=42) union (select * from lh_test where id=58)
+data = ModelDemo().where('id', 42).union(ModelDemo().where('id', '=', 58)).get()
 ```
 
 ### Original SQL
