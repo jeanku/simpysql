@@ -133,7 +133,7 @@ ModelDemo().where('id', 1).increment('status')        #status increment by 1
 ModelDemo().where('id', 1).increment('status', 5)     #status increment by 5
 ```
 
-## Decrement
+## Decreament
 ``` python
 ModelDemo().where('id', 1).decrement('status')        #status decrement by 1
 ModelDemo().where('id', 1).decrement('status', 5)     #status decrement by 5
