@@ -32,6 +32,7 @@ class Builder(BaseBuilder):
         self.__union__ = []                         # union & unionall
         self.__on__ = []                            # leftjoin
         self.__having__ = None                      # having
+        self.__subquery__ = None
 
     def first(self):
         self.__limit__ = 1
@@ -198,6 +199,10 @@ class Builder(BaseBuilder):
         self.__union__.append(('union', model))
         return self
 
+    def subquery(self, model):
+        self.__subquery__ = model
+        return self
+
     def unionall(self, model):
         self.__union__.append(('union all', model))
         return self
@@ -209,9 +214,11 @@ class Builder(BaseBuilder):
     def _compile_select(self):
         subsql = ''.join(
             [self._compile_where(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(), self._compile_limit(),
-             self._compile_offset(), self._compile_lock(), self._compile_having()])
+             self._compile_offset(), self._compile_lock(), self._compile_having(),])
         joinsql = ''.join(self._compile_leftjoin())
         returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(),joinsql, subsql)
+        if self.__subquery__:
+            return "select {} from ".format(','.join(self.__select__)) + self._compile_subquery()
         if self.__union__:
             return '({})'.format(returnsql) + self._compile_union()
         return returnsql
@@ -272,6 +279,11 @@ class Builder(BaseBuilder):
     def _compile_union(self):
         if self.__union__:
             return ' ' + ' '.join(['{} ({})'.format(index, value.tosql()) for (index, value) in self.__union__])
+        return ''
+
+    def _compile_subquery(self):
+        if self.__subquery__:
+            return '({}) AS TMP'.format(self.__subquery__.tosql())
         return ''
 
     def _compile_on(self):
