@@ -302,11 +302,21 @@ data = ModelDemo().select('id', 'name', 'status').data()                        
 
 # Transaction
 ``` python
+method1:
 def demo():
     ModelDemo().where('id', 42).update({'name': "44", 'token_name': '444'})
     ModelDemo().where('id', 43).update({'name': "44", 'token_name': '444'})
     return True
 data = ModelDemo().transaction(demo)
+
+method2:
+@ModelDemo.transaction
+def demo(id):
+    ModelDemo().where('id', id).update({'name': "44", 'token_name': '111'})
+    ModelDemo().where('id', 43).update({'name': "44", 'token_name': '111'})
+    # raise Exception('haha')
+    return True
+demo(42)
 ```
 
 # Database
