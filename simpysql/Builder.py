@@ -217,10 +217,13 @@ class Builder(BaseBuilder):
              self._compile_offset(), self._compile_lock(), self._compile_having(),])
         joinsql = ''.join(self._compile_leftjoin())
         returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(),joinsql, subsql)
-        if self.__subquery__:
-            return "select {} from ".format(','.join(self.__select__)) + self._compile_subquery()
-        if self.__union__:
-            return '({})'.format(returnsql) + self._compile_union()
+        if self.__subquery__ or self.__union__:
+            subquery_or_union = ''
+            if self.__subquery__:
+                subquery_or_union += "select {} from ".format(','.join(self.__select__)) + self._compile_subquery()
+            if self.__union__:
+                subquery_or_union +=  '({})'.format(returnsql) + self._compile_union()
+            return subquery_or_union
         return returnsql
 
     def _compile_create(self, data):
