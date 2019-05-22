@@ -269,7 +269,7 @@ data = ModelDemo('a').select('a.id', 'a.name').first()
 # 【left join】sql: select a.id,b.name from lh_test as a left join lh_test as b on a.id = b.id where a.id=42
 data = ModelDemo('a').where('a.id', 42).leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
 
-# 【left join】sql: select a.id,b.name from lh_test as a right join lh_test as b on a.id = b.id where a.id=42
+# 【right join】sql: select a.id,b.name from lh_test as a right join lh_test as b on a.id = b.id where a.id=42
 data = ModelDemo('a').where('a.id', 42).rightjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
 
 # 【inner join】sql: select a.id,b.name from lh_test as a inner join lh_test as b on a.id = b.id where a.id=42
