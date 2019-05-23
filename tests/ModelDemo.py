@@ -115,7 +115,9 @@ if __name__ == '__main__':
 
     # data = ModelDemo('a').where('a.id', 42).innerjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
 
-    data = ModelDemo().where('id', 42).union(ModelDemo().where('id', '=', 58)).get()
+    # data = ModelDemo().where('id', 42).union(ModelDemo().where('id', '=', 58)).get()
+    # data = ModelDemo().select('id').subquery(ModelDemo().where('id', '=', 42)).get()
+    data = ModelDemo().select('id').subquery(ModelDemo().where('id', '>', 58)).get()
 
     # data = ModelDemo('a').where('a.id', '<=', 42).select('a.id', 'b.name').leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')) \
     #     .unionall(ModelDemo().where('id', '=', 58).select('id', 'name').orderby('id', 'desc'))\
