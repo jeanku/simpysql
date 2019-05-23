@@ -58,6 +58,7 @@ you need to create a .env file at your project root path, and content as follows
 
 ``` python
 [default]
+DB_TYPE=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_NAME=test_db1
@@ -67,6 +68,7 @@ DB_CHARSET=utf8mb4
 LOG_DIR=/home/logs/python/                      #open sql log
 
 [test_db2]
+DB_TYPE=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_NAME=test_db2
