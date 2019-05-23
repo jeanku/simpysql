@@ -32,7 +32,7 @@ class Builder(BaseBuilder):
         self.__union__ = []                         # union & unionall
         self.__on__ = []                            # leftjoin
         self.__having__ = None                      # having
-        self.__subquery__ = None
+        self.__subquery__ = None                    # subquery
 
     def first(self):
         self.__limit__ = 1
@@ -181,10 +181,14 @@ class Builder(BaseBuilder):
         return self
 
     def leftjoin(self, model):
+        if not (isinstance(model, BaseBuilder)):
+            raise TypeError('invalid parameter type in leftjoin')
         self.__join__.append(('left join', model))
         return self
 
     def rightjoin(self, model):
+        if not (isinstance(model, BaseBuilder)):
+            raise TypeError('invalid parameter type in rightjoin')
         self.__join__.append(('right join', model))
         return self
 
@@ -192,18 +196,20 @@ class Builder(BaseBuilder):
         return self.innerjoin(model)
 
     def innerjoin(self, model):
+        if not (isinstance(model, BaseBuilder)):
+            raise TypeError('invalid parameter type in innerjoin')
         self.__join__.append(('inner join', model))
         return self
 
     def union(self, model):
+        if not (isinstance(model, BaseBuilder)):
+            raise TypeError('invalid parameter type in union')
         self.__union__.append(('union', model))
         return self
 
-    def subquery(self, model):
-        self.__subquery__ = model
-        return self
-
     def unionall(self, model):
+        if not (isinstance(model, BaseBuilder)):
+            raise TypeError('invalid parameter type in unionall')
         self.__union__.append(('union all', model))
         return self
 
@@ -211,19 +217,20 @@ class Builder(BaseBuilder):
         self.__on__.append((column1, operator, column2))
         return self
 
+    def subquery(self, model: BaseBuilder, alias='tmp'):
+        if not (isinstance(model, BaseBuilder) and isinstance(alias, str)):
+            raise TypeError('invalid parameter type in subquery')
+        self.__subquery__ = (alias, model)
+        return self
+
     def _compile_select(self):
         subsql = ''.join(
             [self._compile_where(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(), self._compile_limit(),
              self._compile_offset(), self._compile_lock(), self._compile_having(),])
         joinsql = ''.join(self._compile_leftjoin())
-        returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(),joinsql, subsql)
-        if self.__subquery__ or self.__union__:
-            subquery_or_union = ''
-            if self.__subquery__:
-                subquery_or_union += "select {} from ".format(','.join(self.__select__)) + self._compile_subquery()
-            if self.__union__:
-                subquery_or_union +=  '({})'.format(returnsql) + self._compile_union()
-            return subquery_or_union
+        returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(), joinsql, subsql)
+        if self.__union__:
+            return '({})'.format(returnsql) + ' union ' + self._compile_union()
         return returnsql
 
     def _compile_create(self, data):
@@ -282,11 +289,6 @@ class Builder(BaseBuilder):
     def _compile_union(self):
         if self.__union__:
             return ' ' + ' '.join(['{} ({})'.format(index, value.tosql()) for (index, value) in self.__union__])
-        return ''
-
-    def _compile_subquery(self):
-        if self.__subquery__:
-            return '({}) AS TMP'.format(self.__subquery__.tosql())
         return ''
 
     def _compile_on(self):
@@ -356,6 +358,9 @@ class Builder(BaseBuilder):
         return self
 
     def _tablename(self):
+        if self.__subquery__:
+            index, value = self.__subquery__
+            return '({}) as {}'.format(value.tosql(), index)
         if self.__alias__ is None:
             return self.__model__.__tablename__
         return self.__model__.__tablename__ + ' as {}'.format(self.__alias__)

@@ -210,13 +210,17 @@ data = ModelDemo().select('count(*) as num', 'name').groupby('name').get()
 data = ModelDemo().select('count(*) as num', 'name').groupby('name').having('num', '>', 2).get()
 ```
 
-### 字查询
+### 子查询
 ```python
 # sql: select * from lh_test where id=(select max(id) from lh_test) limit 1
 data = ModelDemo().where('id', ModelDemo().select('max(id)')).first()
 
 # sql:select * from lh_test where id in (select max(id) from lh_test where id <= 50)
 data = ModelDemo().where('id', 'in', ModelDemo().where('id', '<=', 50).select('id')).get()
+
+# sql:select * from (select * from lh_test as a where a.id >= 58) as a
+data = ModelDemo().subquery(ModelDemo('a').where('a.id', '>=', 58), 'a').get()
+
 ```
 
 ### tablename 别名

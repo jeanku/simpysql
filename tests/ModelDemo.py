@@ -117,7 +117,11 @@ if __name__ == '__main__':
 
     # data = ModelDemo().where('id', 42).union(ModelDemo().where('id', '=', 58)).get()
     # data = ModelDemo().select('id').subquery(ModelDemo().where('id', '=', 42)).get()
-    data = ModelDemo().select('id').subquery(ModelDemo().where('id', '>', 58)).get()
+    # data = ModelDemo().subquery(
+    #     ModelDemo('a').where('a.id', '>=', 58).leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.*').orderby('a.id', 'desc').take(2), 'a')\
+    #     .where('a.id', '<=', 60).orderby('id', 'desc').get()
+
+    data = ModelDemo().subquery(ModelDemo('a').where('a.id', '>=', 58), 'a').get()
 
     # data = ModelDemo('a').where('a.id', '<=', 42).select('a.id', 'b.name').leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')) \
     #     .unionall(ModelDemo().where('id', '=', 58).select('id', 'name').orderby('id', 'desc'))\
