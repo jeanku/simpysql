@@ -95,13 +95,24 @@ if __name__ == '__main__':
 
     # 事务
     # def demo():
-    #     ModelDemo().where('id', 42).lock_for_update().first()
+    #     data = ModelDemo().where('id', 42).first()
     #     ModelDemo().where('id', 42).update({'name': "555", 'token_name': '555'})
     #     # ModelDemo().where('id', 43).update({'name': "44", 'token_name': '444'})
     #     # raise Exception('haha')
-    #     return True
+    #     return data
     #
     # data = ModelDemo().transaction(demo)
+    # print(data)
+
+    # @ModelDemo.transaction
+    # def demo(id):
+    #     data = ModelDemo().where('id', 42).first()
+    #     ModelDemo().where('id', id).update({'name': "444", 'token_name': '444'})
+    #     ModelDemo().where('id', 43).update({'name': "44", 'token_name': '444'})
+    #     # raise Exception('haha')
+    #     return data
+    #
+    # print(demo(49))
 
     # data = ModelDemo().database('icoape').where('id', '>', 40).first()
     # print(data)
@@ -121,16 +132,23 @@ if __name__ == '__main__':
     #     ModelDemo('a').where('a.id', '>=', 58).leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.*').orderby('a.id', 'desc').take(2), 'a')\
     #     .where('a.id', '<=', 60).orderby('id', 'desc').get()
 
-    data = ModelDemo().subquery(ModelDemo('a').where('a.id', '>=', 58), 'a').get()
+    # data = ModelDemo().subquery(ModelDemo('a').where('a.id', '>=', 58), 'a').get()
 
     # data = ModelDemo('a').where('a.id', '<=', 42).select('a.id', 'b.name').leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')) \
     #     .unionall(ModelDemo().where('id', '=', 58).select('id', 'name').orderby('id', 'desc'))\
     #     .take(5).get()
+
+    # data = ModelDemo().where('id', 10).first()
 
     # print(data)
     # def change(string):
     #     list_str = string.split('.', 1)
     #     return '.'.join(["`{}`".format(i) if i == list_str[-1] else i for i in list_str])
     #
-    print(data)
+    model1 = ModelDemo('a')
+    # # print(model1._get_connection()._database)
+    # model2 = ModelDemo().database('icoape')
+    #
+    print(model1.where('a.id', '>', 43).select('a.id').first())
+    # print(model2.first())
     pass

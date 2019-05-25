@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from .BaseBuilder import BaseBuilder
+from simpysql.Eloquent.BaseBuilder import BaseBuilder
+
 
 class Expression(object):
 
@@ -12,7 +13,7 @@ class Expression(object):
         if isinstance(key, str):
             return "'{}'".format(key)
         elif isinstance(key, BaseBuilder):
-           return "({})".format(key.tosql())
+            return "({})".format(key.tosql())
         return key
 
     def list_to_str(self, data, parentheses=True):
