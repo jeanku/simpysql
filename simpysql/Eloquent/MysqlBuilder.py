@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import collections
-from pymysql.cursors import SSCursor, DictCursor, SSDictCursor
-from .Expression import expression
-from .Response import Response
+from pymysql.cursors import DictCursor
+from simpysql.Util.Expression import expression
+from simpysql.Util.Response import Response
 from .BaseBuilder import BaseBuilder
 
-class Builder(BaseBuilder):
+
+class MysqlBuilder(BaseBuilder):
     operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',
         'like', 'like binary', 'not like', 'between', 'ilike',
@@ -21,18 +22,18 @@ class Builder(BaseBuilder):
         self.__model__ = model
         self.__alias__ = alias
         self.__where__ = collections.defaultdict(dict)
-        self.__orwhere__ = []                       # orwhere处理逻辑
-        self.__select__ = []                        # 检索的字段
-        self.__limit__ = None                       # 检索的数据条数
-        self.__orderby__ = []                       # 排序字段
-        self.__groupby__ = []                       # 排序字段
-        self.__offset__ = None                      # offset
-        self.__lock__ = None                        # lock
-        self.__join__ = []                          # leftjoin
-        self.__union__ = []                         # union & unionall
-        self.__on__ = []                            # leftjoin
-        self.__having__ = None                      # having
-        self.__subquery__ = None
+        self.__orwhere__ = []  # orwhere处理逻辑
+        self.__select__ = []  # 检索的字段
+        self.__limit__ = None  # 检索的数据条数
+        self.__orderby__ = []  # 排序字段
+        self.__groupby__ = []  # 排序字段
+        self.__offset__ = None  # offset
+        self.__lock__ = None  # lock
+        self.__join__ = []  # leftjoin
+        self.__union__ = []  # union & unionall
+        self.__on__ = []  # leftjoin
+        self.__having__ = None  # having
+        self.__subquery__ = None  # subquery
 
     def first(self):
         self.__limit__ = 1
@@ -181,10 +182,14 @@ class Builder(BaseBuilder):
         return self
 
     def leftjoin(self, model):
+        if not (isinstance(model, BaseBuilder)):
+            raise TypeError('invalid parameter type in leftjoin')
         self.__join__.append(('left join', model))
         return self
 
     def rightjoin(self, model):
+        if not (isinstance(model, BaseBuilder)):
+            raise TypeError('invalid parameter type in rightjoin')
         self.__join__.append(('right join', model))
         return self
 
@@ -192,18 +197,20 @@ class Builder(BaseBuilder):
         return self.innerjoin(model)
 
     def innerjoin(self, model):
+        if not (isinstance(model, BaseBuilder)):
+            raise TypeError('invalid parameter type in innerjoin')
         self.__join__.append(('inner join', model))
         return self
 
     def union(self, model):
+        if not (isinstance(model, BaseBuilder)):
+            raise TypeError('invalid parameter type in union')
         self.__union__.append(('union', model))
         return self
 
-    def subquery(self, model):
-        self.__subquery__ = model
-        return self
-
     def unionall(self, model):
+        if not (isinstance(model, BaseBuilder)):
+            raise TypeError('invalid parameter type in unionall')
         self.__union__.append(('union all', model))
         return self
 
@@ -211,19 +218,21 @@ class Builder(BaseBuilder):
         self.__on__.append((column1, operator, column2))
         return self
 
+    def subquery(self, model: BaseBuilder, alias='tmp'):
+        if not (isinstance(model, BaseBuilder) and isinstance(alias, str)):
+            raise TypeError('invalid parameter type in subquery')
+        self.__subquery__ = (alias, model)
+        return self
+
     def _compile_select(self):
         subsql = ''.join(
-            [self._compile_where(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(), self._compile_limit(),
-             self._compile_offset(), self._compile_lock(), self._compile_having(),])
+            [self._compile_where(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(),
+             self._compile_limit(),
+             self._compile_offset(), self._compile_lock(), self._compile_having(), ])
         joinsql = ''.join(self._compile_leftjoin())
-        returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(),joinsql, subsql)
-        if self.__subquery__ or self.__union__:
-            subquery_or_union = ''
-            if self.__subquery__:
-                subquery_or_union += "select {} from ".format(','.join(self.__select__)) + self._compile_subquery()
-            if self.__union__:
-                subquery_or_union +=  '({})'.format(returnsql) + self._compile_union()
-            return subquery_or_union
+        returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(), joinsql, subsql)
+        if self.__union__:
+            return '({})'.format(returnsql) + ' union ' + self._compile_union()
         return returnsql
 
     def _compile_create(self, data):
@@ -276,7 +285,9 @@ class Builder(BaseBuilder):
 
     def _compile_leftjoin(self):
         if self.__join__:
-            return ' ' + ' '.join(['{} {} on {}'.format(index, value._tablename(), value._compile_on()) for (index, value) in self.__join__])
+            return ' ' + ' '.join(
+                ['{} {} on {}'.format(index, value._tablename(), value._compile_on()) for (index, value) in
+                 self.__join__])
         return ''
 
     def _compile_union(self):
@@ -284,19 +295,15 @@ class Builder(BaseBuilder):
             return ' ' + ' '.join(['{} ({})'.format(index, value.tosql()) for (index, value) in self.__union__])
         return ''
 
-    def _compile_subquery(self):
-        if self.__subquery__:
-            return '({}) AS TMP'.format(self.__subquery__.tosql())
-        return ''
-
     def _compile_on(self):
-        sqlstr = ['{} {} {}'.format(index[0], index[1],index[2]) for index in self.__on__]
+        sqlstr = ['{} {} {}'.format(index[0], index[1], index[2]) for index in self.__on__]
         return ' and '.join(sqlstr)
 
     def _compile_having(self):
         if self.__having__:
             return self.__having__
         return ''
+
     def _compile_where(self):
         if len(self.__where__) > 0:
             sqlstr = []
@@ -304,7 +311,8 @@ class Builder(BaseBuilder):
                 if index in self.operators:
                     if index in ['in', 'not in'] and isinstance(values, dict):
                         for key, value in values.items():
-                            sqlstr.append('{} {} {}'.format(expression.format_sql_column(key), index, expression.list_to_str(value)))
+                            sqlstr.append('{} {} {}'.format(expression.format_sql_column(key), index,
+                                                            expression.list_to_str(value)))
                     elif index in ['between', 'not between'] and isinstance(values, dict):
                         for key, value in values.items():
                             if isinstance(value, list) and len(value) == 2:
@@ -329,17 +337,21 @@ class Builder(BaseBuilder):
                 if isinstance(index, dict):
                     subsql = []
                     for index, value in index.items():
-                        subsql.append('{}={}'.format(expression.format_sql_column(index), expression.format_str_with_quote(value)))
+                        subsql.append('{}={}'.format(expression.format_sql_column(index),
+                                                     expression.format_str_with_quote(value)))
                     sqlstr.append(' and '.join(subsql))
                 elif isinstance(index, tuple):
-                    sqlstr.append('{} {} {}'.format(expression.format_sql_column(index[0]), index[1], expression.format_str_with_quote(index[2])))
+                    sqlstr.append('{} {} {}'.format(expression.format_sql_column(index[0]), index[1],
+                                                    expression.format_str_with_quote(index[2])))
                 elif isinstance(index, list):
                     subsql = []
                     for items in index:
                         if len(items) == 2:
-                            subsql.append('{}={}'.format(expression.format_sql_column(items[0]), expression.format_str_with_quote(items[1])))
+                            subsql.append('{}={}'.format(expression.format_sql_column(items[0]),
+                                                         expression.format_str_with_quote(items[1])))
                         if len(items) == 3:
-                            subsql.append('{} {} {}'.format(expression.format_sql_column(items[0]), items[1], expression.format_str_with_quote(items[2])))
+                            subsql.append('{} {} {}'.format(expression.format_sql_column(items[0]), items[1],
+                                                            expression.format_str_with_quote(items[2])))
                     sqlstr.append('({})'.format(' and '.join(subsql)))
                 else:
                     raise Exception('undefined query condition {}'.format(index.__str__()))
@@ -349,17 +361,19 @@ class Builder(BaseBuilder):
         return ''
 
     def _get_connection(self):
-        return self.__model__.__connection__
+        return self.connect(self.__model__)
 
     def database(self, name):
-        self._get_connection().set_database(name)
+        self.__model__.__database__ = name
         return self
 
     def _tablename(self):
+        if self.__subquery__:
+            index, value = self.__subquery__
+            return '({}) as {}'.format(value.tosql(), index)
         if self.__alias__ is None:
             return self.__model__.__tablename__
         return self.__model__.__tablename__ + ' as {}'.format(self.__alias__)
-
 
     def _format_columns(self, columns):
         return list(map(lambda index: expression.format_sql_column(index), columns))

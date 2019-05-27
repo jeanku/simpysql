@@ -6,6 +6,7 @@
 __author__ = ''
 
 from configparser import ConfigParser
+import os
 
 
 class MyConfigParser(ConfigParser):
@@ -40,8 +41,14 @@ class Config(object):
 
     def items(self, key):
         if self._config.get(key, None) is None:
-            self.get_parser().read(self._base_path + '.env')
-            self._config[key] = dict(self.get_parser().items(key))
+            filepath = self._base_path + '.env'
+            if not (os.path.isfile(filepath) and os.access(filepath, os.R_OK)):
+                raise Exception('.env file not access exception')
+            self.get_parser().read(filepath)
+            try:
+                self._config[key] = dict(self.get_parser().items(key))
+            except Exception:
+                raise Exception('{} not find in .env file'.format(key))
         return self._config[key]
 
     def get_parser(self):
@@ -52,6 +59,7 @@ class Config(object):
     def set_basepath(self, path):
         if self._base_path is None:
             self._base_path = path
+        return self
 
 
 config = Config()

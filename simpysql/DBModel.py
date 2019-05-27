@@ -1,18 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from .Connection import connection
-from .Builder import Builder
+
+from .Eloquent.BuilderFactory import builderfactory
 import time
 
 
 class DBModel():
+    __create_time__ = None  # 插入时间字段
 
-    __connection__ = connection
-
-    __create_time__ = None              # 插入时间字段
-
-    __update_time__ = None              # 更新时间字段
+    __update_time__ = None  # 更新时间字段
 
     # 获取创建时间字段
     def create_time_column(self):
@@ -31,11 +28,6 @@ class DBModel():
         return cls.__new__(cls).transaction_wrapper(callback)
 
     def __new__(cls, *args, **kwargs):
-        if hasattr(cls, '__database__') and cls.__basepath__ is not None:
-            connection.set_config(cls.__basepath__, cls.__database__)
-        else:
-            connection.set_config(cls.__basepath__)
         if len(args) > 0 and isinstance(args[0], str):
-            return Builder(super(DBModel, cls).__new__(cls), alias=args[0])
-        return Builder(super(DBModel, cls).__new__(cls))
-
+            return builderfactory.make(super(DBModel, cls).__new__(cls), alias=args[0])
+        return builderfactory.make(super(DBModel, cls).__new__(cls))

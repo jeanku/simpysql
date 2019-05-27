@@ -10,12 +10,10 @@ import datetime
 
 
 class Logger(object):
-
     _instance = None
 
     _logger = None
 
-    # Log为单例模式
     def __new__(cls, *args, **kw):
         if not cls._instance:
             cls._instance = super(Logger, cls).__new__(cls, *args, **kw)

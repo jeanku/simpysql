@@ -58,6 +58,7 @@ you need to create a .env file at your project root path, and content as follows
 
 ``` python
 [default]
+DB_TYPE=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_NAME=test_db1
@@ -67,6 +68,7 @@ DB_CHARSET=utf8mb4
 LOG_DIR=/home/logs/python/                      #open sql log
 
 [test_db2]
+DB_TYPE=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
 DB_NAME=test_db2
@@ -258,6 +260,9 @@ data = ModelDemo().where('id', ModelDemo().select('max(id)')).first()
 
 # sql:select * from lh_test where id in (select max(id) from lh_test where id <= 50)
 data = ModelDemo().where('id', 'in', ModelDemo().where('id', '<=', 50).select('id')).get()
+
+# sql:select * from (select * from lh_test as a where a.id >= 58) as a
+data = ModelDemo().subquery(ModelDemo('a').where('a.id', '>=', 58), 'a').get()
 ```
 
 ### Tablename Alias
