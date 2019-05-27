@@ -7,6 +7,8 @@ from ..Util.Logger import logger
 
 class Connection(object):
 
+    _logger = None
+
     def log(self, sql):
         if self._logger:
             self._logger.info('【sql】:{}'.format(sql))

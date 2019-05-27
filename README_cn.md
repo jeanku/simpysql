@@ -168,6 +168,8 @@ data = ModelDemo().where('id', 62).orwhere('name', 'like', 'haha%').get()
 # sql: select * from lh_test where `id`=62 or (`name` like 'haha%' and `create_time` < 1555123210)
 data = ModelDemo().where('id', 62).orwhere([['name', 'like', 'haha%'], ['create_time', '<', 1555123210]]).get()
 
+# sql: data = ModelDemo('a').where('FROM_UNIXTIME(create_time, "%Y%m%d%H")', 2019042912).first()
+data = ModelDemo('a').where('FROM_UNIXTIME(create_time, "%Y%m%d%H")', 2019042912).first()
 ```
 
 ### 多添件查询
@@ -210,6 +212,9 @@ data = ModelDemo().select('count(*) as num', 'name').groupby('name').get()
 ```python
 # sql: select count(*) as num,name from lh_test group by name having num > 2
 data = ModelDemo().select('count(*) as num', 'name').groupby('name').having('num', '>', 2).get()
+
+# sql:select * from lh_test having FROM_UNIXTIME(create_time, "%Y%m%d%H") = 2019042912 limit 1 offset 1
+ModelDemo().having('FROM_UNIXTIME(create_time, "%Y%m%d%H")', 2019042912).offset(1).first()
 ```
 
 ### 子查询
