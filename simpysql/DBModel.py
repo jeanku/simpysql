@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from simpysql.Eloquent.BuilderFactory import builderfactory
+from .Eloquent.BuilderFactory import builderfactory
 import time
 
 

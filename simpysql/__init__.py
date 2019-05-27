@@ -1,6 +1,6 @@
-# name = "SimpySql"
-# from .DBModel import DBModel
-#
-# __all__ = [
-#     "DBModel",
-# ]
+name = "simpysql"
+from .DBModel import DBModel
+
+__all__ = [
+    "DBModel",
+]

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 
-from simpysql.Util.Logger import logger
+from ..Util.Logger import logger
 
 
 class Connection(object):

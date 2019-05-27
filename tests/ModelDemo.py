@@ -9,6 +9,7 @@ from tests.BaseModel import BaseModel
 
 
 class ModelDemo(BaseModel):
+
     __tablename__ = 'lh_test'  # 表名
 
     __create_time__ = 'create_time'  # 插入时间字段 如果该字段为None create_time则不会自动添加
@@ -145,10 +146,11 @@ if __name__ == '__main__':
     #     list_str = string.split('.', 1)
     #     return '.'.join(["`{}`".format(i) if i == list_str[-1] else i for i in list_str])
     #
-    model1 = ModelDemo('a')
+    data = ModelDemo('a').first()
+    print(data)
     # # print(model1._get_connection()._database)
     # model2 = ModelDemo().database('icoape')
     #
-    print(model1.where('a.id', '>', 43).select('a.id').first())
+    # print(model1.where('a.id', '>', 43).select('a.id').first())
     # print(model2.first())
     pass

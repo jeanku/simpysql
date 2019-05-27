@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from simpysql.Eloquent.BaseBuilder import BaseBuilder
+from ..Eloquent.BaseBuilder import BaseBuilder
 
 
 class Expression(object):

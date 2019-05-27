@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from simpysql.Util.Config import config
+from ..Util.Config import config
 from .MysqlConnection import MysqlConnection
 
 

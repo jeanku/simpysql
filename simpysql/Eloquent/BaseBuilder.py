@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from simpysql.Connections.ConnectionFactory import connfactory
+from ..Connections.ConnectionFactory import connfactory
 
 
 class BaseBuilder(object):

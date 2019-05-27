@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from simpysql.Util.Config import config
-from simpysql.Eloquent.MysqlBuilder import MysqlBuilder
-from simpysql.Eloquent.MongoBuilder import MongoBuilder
+from ..Util.Config import config
+from ..Eloquent.MysqlBuilder import MysqlBuilder
+from ..Eloquent.MongoBuilder import MongoBuilder
 
 
 class BuilderFactory(object):

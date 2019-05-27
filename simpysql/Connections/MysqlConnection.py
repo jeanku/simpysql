@@ -4,7 +4,7 @@
 from .MysqlConnectionpool import connectionpool
 from .Connection import Connection
 from functools import wraps
-from simpysql.Util.Logger import logger
+from ..Util.Logger import logger
 
 
 class MysqlConnection(Connection):
