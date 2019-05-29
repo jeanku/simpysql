@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from ..Eloquent.BaseBuilder import BaseBuilder
-
+import pymysql
 
 class Expression(object):
 
@@ -11,7 +11,7 @@ class Expression(object):
 
     def format_str_with_quote(self, key):
         if isinstance(key, str):
-            return "'{}'".format(key)
+            return "'{}'".format(pymysql.escape_string(key))
         elif isinstance(key, BaseBuilder):
             return "({})".format(key.tosql())
         return key

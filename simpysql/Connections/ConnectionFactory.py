@@ -3,6 +3,7 @@
 
 from ..Util.Config import config
 from .MysqlConnection import MysqlConnection
+from .MongoConnection import MongoConnection
 
 
 class ConnectionFactory(object):
@@ -25,7 +26,7 @@ class ConnectionFactory(object):
         if db_type == 'mysql':
             return MysqlConnection.instance(database, self.parse_config(database))
         elif db_type == 'mongodb':
-            pass
+            return MongoConnection.instance(database, self.parse_config(database))
         raise Exception('Unsupported driver {}'.format(database))
 
     def parse_config(self, database):

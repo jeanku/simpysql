@@ -6,7 +6,7 @@
 __author__ = ''
 
 from tests.BaseModel import BaseModel
-
+import pymongo
 
 class ModelDemo(BaseModel):
 
@@ -26,14 +26,43 @@ class ModelDemo(BaseModel):
     ]
 
 
+class ModelDemo1(BaseModel):
+
+    __database__ = 'VnTrader_Log_Db'        # 表名
+
+    __tablename__ = '20190226'    # 表名
+
+    __create_time__ = None  # 插入时间字段 如果该字段为None create_time则不会自动添加
+
+    __update_time__ = None  # 更新时间字段 如果该字段为None create_time则不会自动添加
+
+    columns = [             # 数据库字段
+        '_id',
+        'trustor',
+        'asset_issuer',
+        'asset_code',
+        'limit',
+        'asset_type',
+        'transaction_id',
+        'type',
+        'trustee',
+        'id',
+        'source_account',
+    ]
+
+
 if __name__ == '__main__':
     # 插入
-    # ModelDemo().create({'name': "haha1", 'token_name': 'haha124'})
+    # ModelDemo().create({'name': "haha1", 'token_name': "haha'124"})
     # 批量插入
     # ModelDemo().create([{'name': "haha1", 'token_name': 'haha124'}, {'name':"haha2", 'token_name': 'haha125'}])
 
     # 更新
-    # ModelDemo().where('id', 1).update({'name':"hehe", 'token_name': 'hehe123'})
+    # data = {'name':"hehe", 'token_name': 'haha"\"\'124'}
+    # print(data.__str__())
+    # ModelDemo().where('id', 42).update(data)
+    # print("123")
+    # exit(0)
     # data = ModelDemo().where('id', 1).increment('status')                     #字段自增1
     # data = ModelDemo().where('id', 1).increment('status', 3)                  #字段自增3
     # data = ModelDemo().where('id', 1).decrement('status', 3)                  #字段自减3
@@ -165,4 +194,19 @@ if __name__ == '__main__':
     #     .where('FROM_UNIXTIME(b.create_time, "%Y%m%d%H")', '=', 2019042912) \
     #     .select('*').data()
     # print(data)
+    model = ModelDemo1()\
+        .where({'gateway': 'BITFINEX'})\
+        .whereor('time', '=', '19:38:18').whereor('time', '=', '19:22:04').select('content', 'time', 'gateway').first()
+    print(model)
+    exit(0)
+    # return list(self.db.event.find({"status": "running", "expire_time": {"$lt": "14:08:38"}}))
+
+    # myclient = pymongo.MongoClient('121.196.217.75', 27017)
+    # data = myclient['VnTrader_Log_Db']["20190226"].find().limit(5).sort("time", pymongo.DESCENDING)
+    # # print(data)
+    # for index in data:
+    #     print(index)
+
+    #     print(index)
+
     pass

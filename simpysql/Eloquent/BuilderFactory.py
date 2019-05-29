@@ -26,7 +26,7 @@ class BuilderFactory(object):
         if db_type == 'mysql':
             return MysqlBuilder(model, alias)
         elif db_type == 'mongodb':
-            return MongoBuilder(model, alias)
+            return MongoBuilder(model)
         raise Exception('Unsupported driver {}'.format(db_type))
 
 
