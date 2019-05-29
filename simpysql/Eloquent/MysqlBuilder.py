@@ -249,8 +249,6 @@ class MysqlBuilder(BaseBuilder):
         return returnsql
 
     def _compile_create(self, data):
-        if isinstance(data, dict):
-            data = [data]
         return "insert into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
 
     def _compile_insert(self, columns, data):
