@@ -169,8 +169,14 @@ class MysqlBuilder(BaseBuilder):
     def execute(self, sql):
         return self._get_connection().execute(sql)
 
-    def having(self, column1, operator, column2):
-        self.__having__ = ' having {} {} {}'.format(column1, operator, column2)
+    def having(self, *args):
+        length = args.__len__()
+        if length == 2:
+            self.__having__ = ' having {} {} {}'.format(args[0], '=', args[1])
+        elif length == 3:
+            self.__having__ = ' having {} {} {}'.format(args[0], args[1], args[2])
+        else:
+            raise Exception('invalid parameter in having function')
         return self
 
     def lock_for_update(self):
@@ -214,8 +220,14 @@ class MysqlBuilder(BaseBuilder):
         self.__union__.append(('union all', model))
         return self
 
-    def on(self, column1, operator, column2):
-        self.__on__.append((column1, operator, column2))
+    def on(self, *args):
+        length = args.__len__()
+        if length == 2:
+            self.__on__.append((args[0], '=', args[1]))
+        elif length == 3:
+            self.__on__.append((args[0], args[1], args[2]))
+        else:
+            raise Exception('invalid parameter in on function')
         return self
 
     def subquery(self, model: BaseBuilder, alias='tmp'):
@@ -227,8 +239,9 @@ class MysqlBuilder(BaseBuilder):
     def _compile_select(self):
         subsql = ''.join(
             [self._compile_where(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(),
+             self._compile_having(),
              self._compile_limit(),
-             self._compile_offset(), self._compile_lock(), self._compile_having(), ])
+             self._compile_offset(), self._compile_lock()])
         joinsql = ''.join(self._compile_leftjoin())
         returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(), joinsql, subsql)
         if self.__union__:

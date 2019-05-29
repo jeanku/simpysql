@@ -146,11 +146,23 @@ if __name__ == '__main__':
     #     list_str = string.split('.', 1)
     #     return '.'.join(["`{}`".format(i) if i == list_str[-1] else i for i in list_str])
     #
-    data = ModelDemo('a').first()
-    print(data)
-    # # print(model1._get_connection()._database)
-    # model2 = ModelDemo().database('icoape')
+    # data = ModelDemo('a').first()
+    # print(data)
+    # model2 = ModelDemo().database('icoape').first()
+    # print(model2)
     #
     # print(model1.where('a.id', '>', 43).select('a.id').first())
     # print(model2.first())
+
+    # data = ModelDemo('a').where('FROM_UNIXTIME(create_time, "%Y%m%d%H")', 2019042912).first()
+
+    # data = ModelDemo().having('FROM_UNIXTIME(create_time, "%Y%m%d%H")', 2019042912).offset(1).first()
+    # print(data)
+
+    # subquery1 = ModelDemo('a').where('FROM_UNIXTIME(a.create_time, "%Y%m%d%H")', '=', 2019042913)
+    # data = subquery1.leftjoin(
+    #     ModelDemo('b').on('a.name', '=', 'b.name').on('a.token_name', '=', 'b.token_name')) \
+    #     .where('FROM_UNIXTIME(b.create_time, "%Y%m%d%H")', '=', 2019042912) \
+    #     .select('*').data()
+    # print(data)
     pass
