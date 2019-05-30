@@ -245,7 +245,7 @@ class MysqlBuilder(BaseBuilder):
         joinsql = ''.join(self._compile_leftjoin())
         returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(), joinsql, subsql)
         if self.__union__:
-            return '({})'.format(returnsql) + ' union ' + self._compile_union()
+            return '({})'.format(returnsql) + self._compile_union()
         return returnsql
 
     def _compile_create(self, data):

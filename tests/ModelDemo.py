@@ -156,7 +156,9 @@ if __name__ == '__main__':
 
     # data = ModelDemo('a').where('a.id', 42).innerjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
 
-    # data = ModelDemo().where('id', 42).union(ModelDemo().where('id', '=', 58)).get()
+    data = ModelDemo().where('id', 42).union(ModelDemo().where('id', '=', 58)).first()
+    print(data)
+    exit(0)
     # data = ModelDemo().select('id').subquery(ModelDemo().where('id', '=', 42)).get()
     # data = ModelDemo().subquery(
     #     ModelDemo('a').where('a.id', '>=', 58).leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.*').orderby('a.id', 'desc').take(2), 'a')\
@@ -195,8 +197,7 @@ if __name__ == '__main__':
     #     .select('*').data()
     # print(data)
     model = ModelDemo1()\
-        .where({'gateway': 'BITFINEX'})\
-        .whereor('time', '=', '19:38:18').whereor('time', '=', '19:22:04').select('content', 'time', 'gateway').first()
+        .where({'gateway': 'BITFINEX'}).where('time', '>=', '19:38:').select('content', 'time', 'gateway').data()
     print(model)
     exit(0)
     # return list(self.db.event.find({"status": "running", "expire_time": {"$lt": "14:08:38"}}))
