@@ -47,23 +47,15 @@ class MongoBuilder(BaseBuilder):
         return data
 
     def get(self):
-        if len(self.__select__) == 0:
-            self.__select__.append('{}')
         return self._get_connection().get(self)
 
     def lists(self, columns):
-        if len(self.__select__) == 0:
-            self.__select__.append('{}')
         return Response(self.get()).tolist(columns)
 
     def data(self):
-        if len(self.__select__) == 0:
-            self.__select__.append('{}')
         return Response(self.get()).data()
 
     def response(self):
-        if len(self.__select__) == 0:
-            self.__select__.append('{}')
         return Response(self._get_connection().execute(self._compile_select(), DictCursor))
 
     def count(self):
