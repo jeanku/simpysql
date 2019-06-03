@@ -14,5 +14,5 @@ class Response(object):
 
     def tolist(self, columns):
         if self.__data__ is not None:
-            return self.__data__[columns].values
+            return list(self.__data__[columns].values)
         return []
