@@ -7,39 +7,14 @@ A lightweight mysql orm based on pymysql
 ```python
 ModelDemo().where('id', 4).select('id', 'name').take(5).get()
 ```
-## 中文文档
-[中文文档](https://github.com/jeanku/simpysql/blob/master/README_cn.md)
-
-# Content
-
-- [Installation](#installation)
-- [Initialization](#initialization)
-- [Create Model](#create-model)
-- [Create](#create)
-- [Update](#update)
-- [Delete](#delete)
-- [Select](#select)
-
-- [Select Subquery](#select-subquery)
-- [Tablename Alias](#tablename-alias)
-- [Select Joins](#select-joins)
-- [Select Unions](#select-unions)
-- [Original SQL](#original-sql)
-- [Response](#response)
-- [Transaction](#transaction)
-- [Database](#database)
-- [Log](#log)
-- [Authors](#authors)
 
 
 # Installation
-
 ```
 pip install simpysql
 ```
 
 # Initialization
-
 you need to create a .env file at your project root path, and content as follows:
 
 ``` python
@@ -284,11 +259,9 @@ data = ModelDemo().select('a.id', 'a.name').subquery(submodel, 'a').get()
 
 # 多个子查询查询
 # select a.id,a.name from lh_test as a,(select * from lh_test where id >= 42) as b where a.id=b.id and a.id > '45' limit 5
-submodel1 = ModelDemo().where('id', '<=', 62)
-submodel2 = ModelDemo().where('id', '>=', 42)
-data = ModelDemo().select('a.id', 'a.name').subquery(submodel1, 'a').subquery('lh_test', 'b').subquery(submodel2, 'c')\
-    .where('a.id', 'b.id').where('a.id', 'c.id').where('a.id', '>', '45').take(5).get()
-
+submodel = ModelDemo().where('id', '>=', 42)
+data = ModelDemo().select('a.id', 'a.name').subquery('lh_test', 'a').subquery(submodel, 'b')\
+    .where('a.id', 'b.id').where('a.id', '>', '45').take(5).get()
 ```
 
 # Response
