@@ -16,13 +16,7 @@ ModelDemo().where('id', 4).select('id', 'name').take(5).get()
 - [Initialization](#initialization)
 - [Create Model](#create-model)
 - [Create](#create)
-    - [One Data](#one-data)
-    - [Multi Data](#multi-data)
-    - [Get Lastid](#get-lastid)
 - [Update](#update)
-    - [Update Data](#update-data)
-    - [Increament](#increament)
-    - [Decreament](#decreament)
 - [Delete](#delete)
 - [Select](#select)
     - [Select One Data](#select-one-data)
@@ -108,39 +102,30 @@ class ModelDemo(DBModel):
 
 
 # Create
-
-## One Data
 ``` python
-ModelDemo().create({'name': "haha1", 'token_name': 'haha124'})
+# insert into lh_test (`name`, `token_name`, `create_time`, `update_time`) values ('haha1', "haha'124", 1559553176, 1559553176)
+ModelDemo().create({'name': "haha1", 'token_name': "haha'124"})
+
+lastid = ModelDemo().create({'name': "haha1", 'token_name': "haha'125"}).lastid()
+
+# multi create
+ModelDemo().create([{'name': "haha1", 'token_name': 'haha124'}, {'name': "haha2", 'token_name': 'haha125'}])
+
+# insert into lh_test (`name`, `token_name`) values ('haha1', 'haha125'),('haha1', 'haha124')
+ModelDemo().insert(['name', 'token_name'], [['haha1', 'haha125'], ['haha1', 'haha124']])
 ```
 
-## Multi Data
-``` python
-ModelDemo().create([{'name': "haha1", 'token_name': 'haha124'}, {'name':"haha2", 'token_name': 'haha125'}])
-```
-
-## Get Lastid
-``` python
-id = ModelDemo().create({'name': "haha1", 'token_name': 'haha124'}).lastid()
-```
 
 # Update
-
-## Update Data
 ``` python
-ModelDemo().where('id', 1).update({'name':"hehe", 'token_name': 'hehe123'})
-```
+# update lh_test set name='hehe',token_name='haha4123',update_time=1559534994 where id=117
+ModelDemo().where('id', 117).update({'name': "hehe", 'token_name': 'haha4123'})
 
-## Increment
-``` python
-ModelDemo().where('id', 1).increment('status')        #status increment by 1
-ModelDemo().where('id', 1).increment('status', 5)     #status increment by 5
-```
+data = ModelDemo().where('id', 117).decrement('status')     # status decrease by 1
+data = ModelDemo().where('id', 117).decrement('status', 3)  # status decrease by 3
 
-## Decreament
-``` python
-ModelDemo().where('id', 1).decrement('status')        #status decrement by 1
-ModelDemo().where('id', 1).decrement('status', 5)     #status decrement by 5
+data = ModelDemo().where('id', 117).increment('status')     # status increase by 1
+data = ModelDemo().where('id', 117).increment('status', 3)  # status increase by 3
 ```
 
 # Delete
