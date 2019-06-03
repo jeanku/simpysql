@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from ..Util.Expression import expression
+from ..Util.Expression import expression as expr
 from ..Util.Response import Response
 from .BaseBuilder import BaseBuilder
 import pymongo
@@ -56,7 +56,7 @@ class MongoBuilder(BaseBuilder):
         return Response(self.get()).data()
 
     def response(self):
-        return Response(self._get_connection().execute(self._compile_select(), DictCursor))
+        return Response(self.get())
 
     def count(self):
         return self._get_connection().count(self)
@@ -135,7 +135,7 @@ class MongoBuilder(BaseBuilder):
         if direction.lower() == 'asc':
             self.__orderby__.append((column, pymongo.ASCENDING))
         else:
-            self.__orderby__.append((column, pymongo.ASCENDING))
+            self.__orderby__.append((column, pymongo.DESCENDING))
         return self
 
     def sort(self, column, direction='asc'):
@@ -186,7 +186,7 @@ class MongoBuilder(BaseBuilder):
         return self.__model__.__tablename__ + ' as {}'.format(self.__alias__)
 
     def _format_columns(self, columns):
-        return list(map(lambda index: expression.format_sql_column(index), columns))
+        return list(map(lambda index: expr.format_column(index), columns))
 
     def _set_create_time(self, data):
         currtime = self.__model__.fresh_timestamp()

@@ -7,53 +7,14 @@ A lightweight mysql orm based on pymysql
 ```python
 ModelDemo().where('id', 4).select('id', 'name').take(5).get()
 ```
-## 中文文档
-[中文文档](https://github.com/jeanku/simpysql/blob/master/README_cn.md)
-
-# Content
-
-- [Installation](#installation)
-- [Initialization](#initialization)
-- [Create Model](#create-model)
-- [Create](#create)
-    - [One Data](#one-data)
-    - [Multi Data](#multi-data)
-    - [Get Lastid](#get-lastid)
-- [Update](#update)
-    - [Update Data](#update-data)
-    - [Increament](#increament)
-    - [Decreament](#decreament)
-- [Delete](#delete)
-- [Select](#select)
-    - [Select One Data](#select-one-data)
-    - [Select Multi Data](#select-multi-data)
-    - [Select Condition](#select-condition)
-    - [Select Multi Condition](#select-multi-condition)
-    - [Select Order](#select-order)
-    - [Select Offset](#select-offset)
-    - [Select Columns](#select-columns)
-    - [Select Groupby](#select-groupby)
-    - [Select Having](#select-having)
-    - [Select Subquery](#select-subquery)
-    - [Tablename Alias](#tablename-alias)
-    - [Select Joins](#select-joins)
-    - [Select Unions](#select-unions)
-    - [Original SQL](#original-sql)
-    - [Response](#response)
-- [Transaction](#transaction)
-- [Database](#database)
-- [Log](#log)
-- [Authors](#authors)
 
 
 # Installation
-
 ```
 pip install simpysql
 ```
 
 # Initialization
-
 you need to create a .env file at your project root path, and content as follows:
 
 ``` python
@@ -78,7 +39,7 @@ DB_CHARSET=utf8mb4
 #LOG_DIR=/home/logs/python/                     #close sql log
 ```
 
-## Create Model
+# Create Model
 Create your Model extend DBModel as follows:
 
 ``` python
@@ -108,39 +69,30 @@ class ModelDemo(DBModel):
 
 
 # Create
-
-## One Data
 ``` python
-ModelDemo().create({'name': "haha1", 'token_name': 'haha124'})
+# insert into lh_test (`name`, `token_name`, `create_time`, `update_time`) values ('haha1', "haha'124", 1559553176, 1559553176)
+ModelDemo().create({'name': "haha1", 'token_name': "haha'124"})
+
+lastid = ModelDemo().create({'name': "haha1", 'token_name': "haha'125"}).lastid()
+
+# multi create
+ModelDemo().create([{'name': "haha1", 'token_name': 'haha124'}, {'name': "haha2", 'token_name': 'haha125'}])
+
+# insert into lh_test (`name`, `token_name`) values ('haha1', 'haha125'),('haha1', 'haha124')
+ModelDemo().insert(['name', 'token_name'], [['haha1', 'haha125'], ['haha1', 'haha124']])
 ```
 
-## Multi Data
-``` python
-ModelDemo().create([{'name': "haha1", 'token_name': 'haha124'}, {'name':"haha2", 'token_name': 'haha125'}])
-```
-
-## Get Lastid
-``` python
-id = ModelDemo().create({'name': "haha1", 'token_name': 'haha124'}).lastid()
-```
 
 # Update
-
-## Update Data
 ``` python
-ModelDemo().where('id', 1).update({'name':"hehe", 'token_name': 'hehe123'})
-```
+# update lh_test set name='hehe',token_name='haha4123',update_time=1559534994 where id=117
+ModelDemo().where('id', 117).update({'name': "hehe", 'token_name': 'haha4123'})
 
-## Increment
-``` python
-ModelDemo().where('id', 1).increment('status')        #status increment by 1
-ModelDemo().where('id', 1).increment('status', 5)     #status increment by 5
-```
+data = ModelDemo().where('id', 117).decrement('status')     # status decrease by 1
+data = ModelDemo().where('id', 117).decrement('status', 3)  # status decrease by 3
 
-## Decreament
-``` python
-ModelDemo().where('id', 1).decrement('status')        #status decrement by 1
-ModelDemo().where('id', 1).decrement('status', 5)     #status decrement by 5
+data = ModelDemo().where('id', 117).increment('status')     # status increase by 1
+data = ModelDemo().where('id', 117).increment('status', 3)  # status increase by 3
 ```
 
 # Delete
@@ -149,168 +101,185 @@ ModelDemo().where('id', 4).delete()
 ```
 
 ## Select
-
-### Select One Data
 ``` python
-# sql: select * from lh_test where id = 4 limit 1
-data = ModelDemo().where('id', 4).first()
-data = ModelDemo().where('id', '=', 4).first()
-return data: {'id':4, 'name':...}
-```
+# select * from lh_test where id=117
+data = ModelDemo().where('id', 117).get()
+data = ModelDemo().where({'id': 117}).get()
+data = ModelDemo().where('id', '=', 117).get()
 
-### Select Multi Data
-``` python
-# sql: select * from lh_test where id > 4 limit 5
-data = ModelDemo().where('id', '>', 4).take(5).get()
-return data: [{'id':5, 'name':...},{}...]
-```
+ # >=, >, <.<=, !=, like, not in, in, not between, between, like, not like
+data = ModelDemo().where('id', '>=', 21026).get()
+data = ModelDemo().where('id', '>', 21026).get()
+data = ModelDemo().where('id', '<', 21026).get()
+data = ModelDemo().where('id', '<=', 21026).get()
+data = ModelDemo().where('id', '!=', 21026).get()
+data = ModelDemo().where('id', 'in', ['21026', '21027']).get()
+data = ModelDemo().where('id', 'not in', [21026, 21027, 4283]).get()
+data = ModelDemo().where('id', 'between', [21026, 21027]).get()
+data = ModelDemo().where('id', 'not between', [21026, 21027]).get()
+data = ModelDemo().where('name', 'like', 'Tether%').get()
+data = ModelDemo().where('name', 'not like', 'Tether%').get()
 
-### Select Condition
-``` python
-# sql: select * from lh_test where id >= 4
-data = ModelDemo().where('id', '>=', 4).get()
+# 多条件查询
+# select * from lh_test where `id`=1 and `name`='hehe' and `token_name`='hehe123' and `id` > 0
+data = ModelDemo().where({'id': 1, 'name': 'hehe', 'token_name': 'hehe123'}).where('id', '>', 0).get()
 
-# sql: select * from lh_test where id > 4
-data = ModelDemo().where('id', '>', 4).get()
+# 排序(order by)
+data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').get()  # 正序
+data = ModelDemo().where('id', '>', 0).orderby('id').get()  # 正序
+data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').get()  # 倒序
+data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').orderby('status', 'asc').get()  # 多个字段排序
 
-# sql: select * from lh_test where id < 4
-data = ModelDemo().where('id', '<', 4).get()
+# 取数量(limit m)
+data = ModelDemo().where('id', '>', 0).take(1).get()  # 取一条 并返回list
+data = ModelDemo().where('id', '>', 0).take(5).get()  # 取5条 并返回list
 
-# sql: select * from lh_test where id <= 4
-data = ModelDemo().where('id', '<=', 4).get()
+# 偏移量(offset m)
+data = ModelDemo().where('id', '>', 0).offset(10).take(5).get()  # 偏移量为1， 取5条 并返回list
 
-# sql: select * from lh_test where id != 4
-data = ModelDemo().where('id', '!=', 4).get()
+# 检索字段(select columns)
+data = ModelDemo().select('id', 'name').take(5).get()  # select `id`,`name` from lh_test limit 5
+data = ModelDemo().select('min(id) as minid').get()  # select min(id) as minid from lh_test limit 1
+data = ModelDemo().select('max(id) as maxid').get()  # select max(id) as maxid from lh_test limit 1
+data = ModelDemo().select(
+    'from_unixtime(create_time) as time').get()  # select from_unixtime(create_time) as time from lh_test
+data = ModelDemo().select('count(distinct id)').get()  # select count(distinct id) from lh_test
 
-# sql: select * from lh_test where id in (1,2)
-data = ModelDemo().where('id', 'in', [1, 2]).get()
-
-# sql: select * from lh_test where id not in (1,2)
-data = ModelDemo().where('id', 'not in', [1, 2]).get()
-
-# sql: select * from lh_test where id between (1,2)
-data = ModelDemo().where('id', 'between', [1, 2]).get()
-
-# sql: select * from lh_test where id not between (1,2)
-data = ModelDemo().where('id', 'not between', [1, 2]).get()
-
-# sql: select * from lh_test where name like '%Tether%'
-data = ModelDemo().where('name', 'like', '%Tether%').get()
-
-# sql: select * from lh_test where name not like '%Tether%'
-data = ModelDemo().where('name', 'not like', '%Tether%').get()
-
-# sql: select * from lh_test where `id`=62 or `name`='haha'
-data = ModelDemo().where('id', 62).orwhere('name', 'haha').get()
-
-# sql: select * from lh_test where `id`=62 or `name` like 'haha%'
-data = ModelDemo().where('id', 62).orwhere('name', 'like', 'haha%').get()
-
-# sql: select * from lh_test where `id`=62 or (`name` like 'haha%' and `create_time` < 1555123210)
-data = ModelDemo().where('id', 62).orwhere([['name', 'like', 'haha%'], ['create_time', '<', 1555123210]]).get()
-
-# sql: data = ModelDemo('a').where('FROM_UNIXTIME(create_time, "%Y%m%d%H")', 2019042912).first()
-data = ModelDemo('a').where('FROM_UNIXTIME(create_time, "%Y%m%d%H")', 2019042912).first()
-```
-
-### Select Multi Condition
-``` python
-# sql:select * from lh_test where id=1 and name='hehe'
-data = ModelDemo().where({'id': 1, 'name': 'hehe'}).get()
-
-# sql:select * from lh_test where id=1 and name like 'hehe%'
-data = ModelDemo().where('id', 1).where('name', 'like', 'hehe%').get()
-```
-
-### Select Order
-``` python
-# sql: select * from lh_test where `id` > 0 order by `id` desc,`status`
-data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').orderby('status').get()
-```
-
-### Select Offset
-``` python
-# sql: select * from lh_test where id > 100 limit 5 offset 10
-data = ModelDemo().where('id', '>', 100).offset(10).take(5).get()
-```
-
-### Search Colums
-``` python
-# sql: select `id`,`name` from lh_test limit 5
-data = ModelDemo().select('id', 'name').take(5).get()
-
-# 对应sql: select min(id) as minid from lh_test limit 1
-data = ModelDemo().select('min(id) as minid').first()
-```
-
-### Select Groupby
-``` python
-# sql: select count(*) as num,name from lh_test group by name
+# groupby
+# select count(*) as num,name from lh_test group by name
 data = ModelDemo().select('count(*) as num', 'name').groupby('name').get()
+# select count(*) as num,name,token_name from lh_test group by name,token_name
+data = ModelDemo().select('count(*) as num', 'name', 'token_name').groupby('name', 'token_name').get()
+# select count(*) as num from lh_test group by left(name, 4)
+data = ModelDemo().select('count(*) as num').groupby('left(name, 4)').get()
+
+# having
+# select count(*) as num,name from lh_test group by name having num = 2
+data = ModelDemo().select('count(*) as num', 'name').groupby('name').having('num', 2).get()
+# select name from lh_test having left(name, 4) = 'haha'
+data = ModelDemo().select('name').having('left(name, 4)', '=', 'haha').get()
+
+# 锁 lock (共享所和排他锁)
+# select * from lh_test limit 1 for update
+data = ModelDemo().lock_for_update().get()
+# select * from lh_test lock in share mode
+data = ModelDemo().lock_for_share().get()
+
+# 原生sql
+data = ModelDemo().execute('select count(*) as num,`name` from lh_test group by name')
+
+# 表名设置别名
+# select a.name,a.token_name from lh_test as a where id=62
+data = ModelDemo('a').select('a.name', 'a.token_name').where('id', 62).get()
 ```
 
-### Select Having
+### Select or
 ``` python
-# sql: select count(*) as num,name from lh_test group by name having num > 2
-data = ModelDemo().select('count(*) as num', 'name').groupby('name').having('num', '>', 2).get()
+# select * from lh_test where id=62 or id=63
+data = ModelDemo().where('id', 62).orwhere('id', 63).get()
+data = ModelDemo().where('id', 62).orwhere('id', '=', 63).get()
+data = ModelDemo().where('id', 62).orwhere({'id': 63}).get()
 
-# sql:select * from lh_test having FROM_UNIXTIME(create_time, "%Y%m%d%H") = 2019042912 limit 1 offset 1
-ModelDemo().having('FROM_UNIXTIME(create_time, "%Y%m%d%H")', 2019042912).offset(1).first()
+# select * from lh_test where id=62 or .. or ..
+data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', '>', 64).get()
+data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', '>=', 64).get()
+data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', '<', 64).get()
+data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', '<=', 64).get()
+data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', '!=', 64).get()
+data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', 'in', [64, 65]).get()
+data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', 'not in', (64, 65)).get()
+data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', 'like', '64%').get()
+data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', 'not like', '64%').get()
+data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', 'between', (64, 65)).get()
+data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', 'not between', [64, 65]).get()
 
+# select * from lh_test where id=63 or id in (select id from lh_test where id in (56, 57))
+subquery = ModelDemo().select('id').where('id', 'in', [56, 57])
+data = ModelDemo().where('id', 63).orwhere('id', 'in', subquery).get()
+
+# select * from lh_test where id=62 or (id > 63 and id < 78)
+data = ModelDemo().where('id', 62).orwhere([['id', '>', 63], ('id', '<', 78)]).get()
+
+# select * from lh_test where id=62 or (id=63 and name='haha')
+data = ModelDemo().where('id', 62).orwhere({'id': 63, 'name': 'haha'}).get()
+
+# select * from lh_test where id=62 and ((id=63 and name='haha') or id < 78 or (id <= 75 and id >= 56))
+data = ModelDemo().where('id', 62).whereor([
+    {'id': 63, 'name': 'haha'},
+    ('id', '<', 78),
+    [
+        ['id', '<=', 75],
+        ['id', '>=', 56],
+    ]
+]).get()
 ```
 
-### Select Subquery
+# Select 关联查询
 ``` python
-# sql: select * from lh_test where id=(select max(id) from lh_test) limit 1
-data = ModelDemo().where('id', ModelDemo().select('max(id)')).first()
+# in/not in 子查询
+# select * from lh_test where id in (select id from lh_test where id in (56, 57))
+subquery = ModelDemo().select('id').where('id', 'in', [56, 57])
+data = ModelDemo().where('id', 'in', subquery).get()
+data = ModelDemo().where('id', 'not in', subquery).get()
 
-# sql:select * from lh_test where id in (select max(id) from lh_test where id <= 50)
-data = ModelDemo().where('id', 'in', ModelDemo().where('id', '<=', 50).select('id')).get()
+# 子查询
+# select * from lh_test where id=(select max(id) as id from lh_test where id <= 60)
+subquery = ModelDemo().select('max(id) as id').where('id', '=', 60)
+data = ModelDemo().where('id', '=', subquery).get()
 
-# sql:select * from (select * from lh_test as a where a.id >= 58) as a
-data = ModelDemo().subquery(ModelDemo('a').where('a.id', '>=', 58), 'a').get()
-```
+# left join
+# select a.id,b.name from lh_test as a left join lh_test as b on a.id = b.id where a.id=42
+joinmodel = ModelDemo('b').on('a.id', '=', 'b.id')
+data = ModelDemo('a').where('a.id', 42).leftjoin(joinmodel).select('a.id', 'b.name').get()
 
-### Tablename Alias
-``` python
-# sql: select a.id,a.name from lh_test as a limit 1
-data = ModelDemo('a').select('a.id', 'a.name').first()
-```
+# right join
+# select a.id,b.name from lh_test as a right join lh_test as b on a.id = b.id where a.id=42
+joinmodel = ModelDemo('b').on('a.id', '=', 'b.id')
+data = ModelDemo('a').where('a.id', 42).rightjoin(joinmodel).select('a.id', 'b.name').get()
 
-### Select Joins
-``` python
-# 【left join】sql: select a.id,b.name from lh_test as a left join lh_test as b on a.id = b.id where a.id=42
-data = ModelDemo('a').where('a.id', 42).leftjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
+# inner join
+# select a.id,b.name from lh_test as a inner join lh_test as b on a.id = b.id where a.id=42
+joinmodel = ModelDemo('b').on('a.id', '=', 'b.id')
+data = ModelDemo('a').where('a.id', 42).join(joinmodel).select('a.id', 'b.name').get()
+data = ModelDemo('a').where('a.id', 42).innerjoin(joinmodel).select('a.id', 'b.name').get()
 
-# 【right join】sql: select a.id,b.name from lh_test as a right join lh_test as b on a.id = b.id where a.id=42
-data = ModelDemo('a').where('a.id', 42).rightjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
+# union / union all
+data = ModelDemo().where('id', 62).union(ModelDemo().where('id', '=', 58)).get()
+data = ModelDemo().where('id', 62).unionall(ModelDemo().where('id', '=', 58)).get()
 
-# 【inner join】sql: select a.id,b.name from lh_test as a inner join lh_test as b on a.id = b.id where a.id=42
-data = ModelDemo('a').where('a.id', 42).innerjoin(ModelDemo('b').on('a.id', '=', 'b.id')).select('a.id', 'b.name').get()
-```
+# subquery
+# select id from (select * from lh_test where id=42) as tmp
+submodel = ModelDemo().where('id', '=', 42)
+data = ModelDemo().select('id').subquery(submodel).get()
 
-### Select Unions
-``` python
-# 【union all】sql: (select * from lh_test where id=42) union all (select * from lh_test where id=58)
-data = ModelDemo().where('id', 42).unionall(ModelDemo().where('id', '=', 58)).get()
+# 子查询查询别名
+# select a.id,a.name from (select * from lh_test where id=42) as a
+submodel = ModelDemo().where('id', '=', 42)
+data = ModelDemo().select('a.id', 'a.name').subquery(submodel, 'a').get()
 
-# 【union】sql: (select * from lh_test where id=42) union (select * from lh_test where id=58)
-data = ModelDemo().where('id', 42).union(ModelDemo().where('id', '=', 58)).get()
-```
-
-### Original SQL
-``` python
-sql = 'select count(*) as num,name from lh_test group by name'
-data = ModelDemo().execute(sql)
+# 多个子查询查询
+# select a.id,a.name from lh_test as a,(select * from lh_test where id >= 42) as b where a.id=b.id and a.id > '45' limit 5
+submodel = ModelDemo().where('id', '>=', 42)
+data = ModelDemo().select('a.id', 'a.name').subquery('lh_test', 'a').subquery(submodel, 'b')\
+    .where('a.id', 'b.id').where('a.id', '>', '45').take(5).get()
 ```
 
 # Response
 ``` python
-data = ModelDemo().where('id', '=', 1).select('id').first()                             # {'id':1}
-data = ModelDemo().where('id', '=', 1).select('id').get()                               # [{'id':1}]
-data = ModelDemo().where('id', 'in', [1,2,3]).select('id', 'name').lists('id')          # [1,2,3]
-data = ModelDemo().where('id', 'in', [1,2]).select('id', 'name').lists(['id', 'name'])  # [[1,'name1'],[2,'name2']]
-data = ModelDemo().select('id', 'name', 'status').data()                                # return pandas DataFrame
+# 返回单条数据 dict: {'id': 50}
+data = ModelDemo().where('id', '>=', 50).select('id').first()
+
+# 返回单条数据 list: [{'id': 50}]
+data = ModelDemo().where('id', '>=', 50).select('id').take(1).get()
+
+# 返回单条数据 list: [50 55 56 57 58]
+data = ModelDemo().where('id', '>=', 50).take(5).lists('id')
+
+# 返回单条数据 list: [[50 'haha'] [55 'haha'] [56 'haha'] [57 'haha'] [58 'haha']]
+data = ModelDemo().where('id', '>=', 50).take(5).lists(['id', 'name'])
+
+# 返回pandas dataFrame / None
+data = ModelDemo().where('id', '>=', 1150).take(5).data()
 ```
 
 # Transaction

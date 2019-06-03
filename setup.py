@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="simpysql",
-    version="0.1.7",
+    version="0.1.8",
     author="jeanku, liubing",
     author_email="",
     description="A simple mysql orm base on pymysql",
@@ -23,6 +23,7 @@ setuptools.setup(
         'pandas',
         'configparser',
         'DBUtils',
+        'pymongo',
     ],
     entry_points={
         "console_scripts": ['simpysql = DBModel:DBModel']

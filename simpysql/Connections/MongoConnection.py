@@ -23,6 +23,7 @@ class MongoConnection(Connection):
         _select = dict(builder.__select__) if builder.__select__ else None
         model = self.db(builder._tablename()).find(builder.__where__, _select).limit(builder.__limit__)
         if builder.__orderby__:
+            print(builder.__orderby__)
             model = model.sort(builder.__orderby__)
         return list(model)
 

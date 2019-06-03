@@ -6,23 +6,30 @@ import pymysql
 
 class Expression(object):
 
-    def format_sql_column(self, key):
+    def __init__(self, name=None):
+        self.__name = name
+
+    def format_column(self, key):
         return key
 
-    def format_str_with_quote(self, key):
-        if isinstance(key, str):
+    def format_string(self, key):
+        if isinstance(key, Expression):
+            return key.__name
+        elif isinstance(key, str):
             return "'{}'".format(pymysql.escape_string(key))
         elif isinstance(key, BaseBuilder):
             return "({})".format(key.tosql())
         return key
 
-    def list_to_str(self, data, parentheses=True):
-        returnStr = ''
+    def list_to_str(self, data):
         if data and isinstance(data, list):
-            returnStr = data.__str__()[1: -1]
+            return tuple(data).__str__()
+        if data and isinstance(data, tuple):
+            return data.__str__()
         elif isinstance(data, BaseBuilder):
-            returnStr = data.tosql()
-        return '({})'.format(returnStr) if parentheses else returnStr
+            return "(" + data.tosql() + ")"
+        else:
+            raise Exception('param invalid')
 
 
 expression = Expression()
