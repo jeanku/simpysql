@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="simpysql",
-    version="0.1.8",
+    version="0.1.9",
     author="jeanku, liubing",
     author_email="",
     description="A simple mysql orm base on pymysql",
