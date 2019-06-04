@@ -172,7 +172,7 @@ data = ModelDemo('a').where('id', '>', 63).min('id')
 data = ModelDemo('a').where('id', '>', 63).avg('id')
 data = ModelDemo('a').where('id', '>', 63).sum('id')
 
-# 判断记录是否存在
+# 判断记录是否存在 return: True/False 
 data = ModelDemo('a').where('id', '>', 63).exist()
     
 # 原生sql
