@@ -188,12 +188,12 @@ if __name__ == '__main__':
     # data = ModelDemo().database('icoape').where('id', '>', 40).first()
     # print(data)
     # data = ModelDemo().where('id', 62).orwhere({'name': 'haha'}).get()
-    data = ModelDemo().where('id', 1).whereor([{'name': 'haha', 'token_name': 123}, ('token_name', 'like', 'hahe%'), [
-        ['name', '=', '123'], ['token_name', '=', 333]
-    ]]).get()
-
-    print(data)
-    exit(0)
+    # data = ModelDemo().where('id', 1).whereor([{'name': 'haha', 'token_name': 123}, ('token_name', 'like', 'hahe%'), [
+    #     ['name', '=', '123'], ['token_name', '=', 333]
+    # ]]).get()
+    #
+    # print(data)
+    # exit(0)
 
     # data = ModelDemo().where('id', 42).orwhere([('name', 'haha%'), ['token_name', '444444'], ['token_name', '!=', '444444']]).orwhere({'id': 43}).get()
     # # data = ModelDemo().where('id', 42).orwhere({'name': 'haha%', 'token_name': '444444'}).get()
@@ -285,4 +285,4 @@ if __name__ == '__main__':
     # data = ModelDemo3().select('blockNumber').where('blockNumber', -1).orderby('blockNumber', 'desc').take(10).lists('blockNumber')
     # print(data)
     # exit(0)
-    # pass
+    pass
