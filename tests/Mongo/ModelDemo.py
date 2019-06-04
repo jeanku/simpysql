@@ -35,9 +35,38 @@ class ModelDemo1(BaseModel):
 
 if __name__ == '__main__':
 
-    model = ModelDemo1().select('content', 'time', 'gateway').data()
+    data = ModelDemo1().select('content', 'time', 'gateway').data()
+
+    # select * from table where gateway = 'MAIN_ENGINE'
+    # data = ModelDemo1().where({'gateway': 'MAIN_ENGINE'}).select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('gateway', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('gateway', '=', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
+
+    # data = ModelDemo1().where('gateway', '=', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
+    # data = ModelDemo1().where('gateway', '<=', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
+    # data = ModelDemo1().where('gateway', '<', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
+    # data = ModelDemo1().where('gateway', '>', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
+    # data = ModelDemo1().where('gateway', '>=', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
+    # data = ModelDemo1().where('gateway', '!=', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
+    # data = ModelDemo1().where('gateway', 'in', ['MAIN_ENGINE', 'BITFINEX']).select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('gateway', 'not in', ['MAIN_ENGINE', 'BITFINEX']).select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('gateway', 'like', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('gateway', 'not like', 'BITFINEX').select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('gateway', 'ilike', 'MAIN_eNGINE').select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('gateway', 'not ilike', 'bITFINEX').select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('gateway', 'like', 'ENGINE$').select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('gateway', 'like', '^MAIN_').select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('gateway', 'like', '^MAIN_ENGINE$').select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('gateway', 'like', '^MAIN_ENGINE$').select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('time', 'between', ['14:08:38', '14:11:37']).select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().where('time', 'not between', ['14:11:38', '19:38:18']).select('content', 'time', 'gateway').data()
+
     # model = ModelDemo1().where({'gateway': 'BITFINEX'}).where('time', '>=', '19:38:').select('content', 'time', 'gateway').get()
-    print(model)
+
+    # skip
+    data = ModelDemo1().where({'gateway': 'BITFINEX'}).offset(4).select('content', 'time', 'gateway').data()
+
+    print(data)
     exit(0)
     #
     # data = ModelDemo2().where('time', '>', '2019-05-01 00:17:30').take(5).get()

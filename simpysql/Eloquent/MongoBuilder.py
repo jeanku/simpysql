@@ -10,7 +10,8 @@ import pymongo
 class MongoBuilder(BaseBuilder):
     operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',
-        'like', 'in', 'not in', 'not between', 'exist'
+        'like', 'in', 'not in', 'not between', 'exist',
+        'not like', 'ilike', 'not ilike', 'between', 'mod', 'all', 'size'
     ]
     operators_map = {
         '<': '$lt',
@@ -21,7 +22,13 @@ class MongoBuilder(BaseBuilder):
         'in': '$in',
         'not in': '$nin',
         'like': '$regex',
+        'ilike': '$regex',
+        'not like': '$regex',
+        'not ilike': '$regex',
         'exist': '$exist',
+        'mod': '$mod',
+        'all': '$all',
+        'size': '$size',
     }
 
     def __init__(self, model, alias=None):
@@ -32,7 +39,7 @@ class MongoBuilder(BaseBuilder):
         self.__limit__ = 0  # 检索的数据条数
         self.__orderby__ = []  # 排序字段
         self.__groupby__ = []  # 排序字段
-        self.__offset__ = None  # offset
+        self.__offset__ = 0    # offset
         self.__lock__ = None  # lock
         self.__join__ = []  # leftjoin
         self.__union__ = []  # union & unionall
@@ -113,7 +120,7 @@ class MongoBuilder(BaseBuilder):
                 if args[1] == '=':
                     self.__where__['$and'].append({args[0]: args[2]})
                 else:
-                    self.__where__['$and'].append({args[0]: {self.operators_map[args[1]]: args[2]}})
+                    self.__where__['$and'].append(self._compile_tuple((args[0], args[1], args[2])))
             else:
                 raise Exception('operator key world not found: "{}"'.format(args[1]))
         else:
@@ -158,17 +165,23 @@ class MongoBuilder(BaseBuilder):
                     return {{data[0]: {self.operators_map[data[1]]: data[2]}}}
         raise Exception('bad parameters')
 
-    def _compile_select(self):
-        subsql = ''.join(
-            [self._compile_where(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(),
-             self._compile_having(),
-             self._compile_limit(),
-             self._compile_offset(), self._compile_lock()])
-        joinsql = ''.join(self._compile_leftjoin())
-        returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(), joinsql, subsql)
-        if self.__union__:
-            return '({})'.format(returnsql) + ' union ' + self._compile_union()
-        return returnsql
+    def _compile_tuple(self, data):
+        if data[1] == 'not like':
+            return {data[0]: {self.operators_map[data[1]]: '^((?!{}).)*$'.format(data[2])}}
+        elif data[1] == 'ilike':
+            return {data[0]: {self.operators_map[data[1]]: data[2], '$options': 'i'}}
+        elif data[1] == 'not ilike':
+            return {data[0]: {self.operators_map[data[1]]: '^((?!{}).)*$'.format(data[2]), '$options': 'i'}}
+        elif data[1] == 'between':
+            if len(data[2]) != 2:
+                raise Exception('between param error')
+            return {data[0]: {'$lte': data[2][1], '$gte': data[2][0]}}
+        elif data[1] == 'not between':
+            if len(data[2]) != 2:
+                raise Exception('not between param error')
+            return {'$or': [{data[0]: {'$gt': data[2][1]}}, {data[0]: {'$lt': data[2][0]}}]}
+        else:
+            return {data[0]: {self.operators_map[data[1]]: data[2]}}
 
     def _get_connection(self):
         return self.connect(self.__model__)
