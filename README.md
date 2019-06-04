@@ -165,6 +165,16 @@ data = ModelDemo().lock_for_update().get()
 # select * from lh_test lock in share mode
 data = ModelDemo().lock_for_share().get()
 
+# 聚合查询
+data = ModelDemo('a').where('id', '>', 163).count()
+data = ModelDemo('a').where('id', '>', 63).max('id')
+data = ModelDemo('a').where('id', '>', 63).min('id')
+data = ModelDemo('a').where('id', '>', 63).avg('id')
+data = ModelDemo('a').where('id', '>', 63).sum('id')
+
+# 判断记录是否存在
+data = ModelDemo('a').where('id', '>', 63).exist()
+    
 # 原生sql
 data = ModelDemo().execute('select count(*) as num,`name` from lh_test group by name')
 

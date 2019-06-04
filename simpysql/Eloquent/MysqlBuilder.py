@@ -55,6 +55,42 @@ class MysqlBuilder(BaseBuilder):
     def response(self):
         return Response(self._get_connection().execute(self._compile_select(), DictCursor))
 
+    def max(self, column):
+        if isinstance(column, str) and column in self.__model__.columns:
+            self.__select__ = ['max({}) as aggregate'.format(column)]
+            data = self.first()
+            return data['aggregate'] if data else None
+        raise Exception('param invalid in function max')
+
+    def min(self, column):
+        if isinstance(column, str) and column in self.__model__.columns:
+            self.__select__ = ['min({}) as aggregate'.format(column)]
+            data = self.first()
+            return data['aggregate'] if data else None
+        raise Exception('param invalid in function min')
+
+    def avg(self, column):
+        if isinstance(column, str) and column in self.__model__.columns:
+            self.__select__ = ['avg({}) as aggregate'.format(column)]
+            data = self.first()
+            return data['aggregate'] if data else None
+        raise Exception('param invalid in function avg')
+
+    def sum(self, column):
+        if isinstance(column, str) and column in self.__model__.columns:
+            self.__select__ = ['sum({}) as aggregate'.format(column)]
+            data = self.first()
+            return data['aggregate'] if data else None
+        raise Exception('param invalid in function sum')
+
+    def count(self):
+        self.__select__ = ['count(*) as aggregate']
+        data = self.first()
+        return data['aggregate'] if data else None
+
+    def exist(self):
+        return True if self.count() > 0 else False
+
     def update(self, data):
         if data and isinstance(data, dict):
             data = self._set_update_time(data)
