@@ -71,18 +71,19 @@ class MongoBuilder(BaseBuilder):
     def update(self, data):
         if data and isinstance(data, dict):
             data = self._set_update_time(data)
-            return self._get_connection().execute(self._compile_update(data))
+            return self._get_connection().update(self, {'$set': data})
+        return None
 
     def create(self, data):
         if data:
-            if data and isinstance(data, dict):
+            if isinstance(data, dict):
                 data = [data]
             data = self._set_create_time(data)
-            self._get_connection().execute(self._compile_create(data))
-        return self
+            return self._get_connection().create(self, data)
+        return None
 
     def delete(self):
-        return self._get_connection().execute(self._compile_delete())
+        return self._get_connection().delete(self)
 
     def take(self, number):
         if number <= 0:
@@ -131,9 +132,12 @@ class MongoBuilder(BaseBuilder):
         if self.__where__.get('$or', None) is None:
             self.__where__['$or'] = []
         length = args.__len__()
-        if length == 1 and isinstance(args[0], list):
-            for index in args[0]:
-                self.__where__['$or'].append(self._compile(index))
+        if length == 1:
+            if isinstance(args[0], list):
+                for index in args[0]:
+                    self.__where__['$or'].append(self._compile(index))
+            elif isinstance(args[0], dict):
+                self.__where__['$or'].append(self._compile(args[0]))
         else:
             self.__where__['$or'].append(self._compile(args))
         return self
@@ -162,7 +166,7 @@ class MongoBuilder(BaseBuilder):
                 if data[1] == '=':
                     return {data[0]: data[2]}
                 else:
-                    return {{data[0]: {self.operators_map[data[1]]: data[2]}}}
+                    return {data[0]: {self.operators_map[data[1]]: data[2]}}
         raise Exception('bad parameters')
 
     def _compile_tuple(self, data):
