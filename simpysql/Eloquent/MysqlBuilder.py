@@ -6,6 +6,7 @@ from pymysql.cursors import DictCursor
 from simpysql.Util.Expression import expression as expr, Expression
 from simpysql.Util.Response import Response
 from .BaseBuilder import BaseBuilder
+from simpysql.Util.Dynamic import Dynamic
 
 
 class MysqlBuilder(BaseBuilder):
@@ -44,7 +45,7 @@ class MysqlBuilder(BaseBuilder):
         return data
 
     def get(self):
-        return self._get_connection().execute(self._compile_select(), DictCursor)
+        return [Dynamic(index) for index in self._get_connection().execute(self._compile_select(), DictCursor)]
 
     def lists(self, columns):
         return Response(self._get_connection().execute(self._compile_select(), DictCursor)).tolist(columns)

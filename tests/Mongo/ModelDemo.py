@@ -6,8 +6,6 @@
 __author__ = ''
 
 from tests.mysqlDemo.BaseModel import BaseModel
-import datetime
-from bson.objectid import ObjectId
 
 class ModelDemo1(BaseModel):
 
@@ -62,7 +60,7 @@ if __name__ == '__main__':
     # data = ModelDemo1().where('gateway', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
     # data = ModelDemo1().where('gateway', '=', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
     #
-    # data = ModelDemo1().where('gateway', '=', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
+    data = ModelDemo1().where('gateway', '=', 'MAIN_ENGINE').select('content', 'time', 'gateway').first()
     # data = ModelDemo1().where('gateway', '<=', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
     # data = ModelDemo1().where('gateway', '<', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
     # data = ModelDemo1().where('gateway', '>', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
@@ -114,7 +112,7 @@ if __name__ == '__main__':
     # data = ModelDemo2().data()
 
 
-    print(data)
+    # print(data)
     # exit(0)
 
     pass

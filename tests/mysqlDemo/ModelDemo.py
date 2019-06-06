@@ -284,5 +284,4 @@ if __name__ == '__main__':
 
     # data = ModelDemo3().select('blockNumber').where('blockNumber', -1).orderby('blockNumber', 'desc').take(10).lists('blockNumber')
     # print(data)
-    # exit(0)
     pass

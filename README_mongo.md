@@ -132,9 +132,15 @@ data = ModelDemo2().where('update_time', '>=', 1559722499).whereor({'name': 'hah
 ``` python
 # 返回单条数据 dict: {'id': 50}
 data = ModelDemo().where('id', '>=', 50).select('id').first()
+print(data)          # {'id': 50}
+print(data.id)       # 50
+print(data['id'])    # 50
 
 # 返回数据 list: [{'id': 50}]
 data = ModelDemo().where('id', '>=', 50).select('id').take(1).get()
+print(data)                                 # [{'id': 50}]
+print([index.id for index in data])         # [50]
+print([index['id'] for index in data])      # [50]
 
 # 返回数据 list: [50, 55, 56, 57, 58]
 data = ModelDemo().where('id', '>=', 50).take(5).lists('id')

@@ -4,6 +4,7 @@
 from ..Util.Expression import expression as expr
 from ..Util.Response import Response
 from .BaseBuilder import BaseBuilder
+from simpysql.Util.Dynamic import Dynamic
 import pymongo
 
 
@@ -54,7 +55,7 @@ class MongoBuilder(BaseBuilder):
         return data
 
     def get(self):
-        return self._get_connection().get(self)
+        return [Dynamic(index) for index in self._get_connection().get(self)]
 
     def lists(self, columns):
         return Response(self.get()).tolist(columns)
