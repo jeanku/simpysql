@@ -21,7 +21,6 @@ class MongoConnection(Connection):
 
     def get(self, builder):
         _select = dict(builder.__select__) if builder.__select__ else None
-        print(builder.__where__)
         model = self.db(builder._tablename()).find(builder.__where__, _select).skip(builder.__offset__).limit(builder.__limit__)
         if builder.__orderby__:
             model = model.sort(builder.__orderby__)

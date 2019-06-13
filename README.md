@@ -70,3 +70,6 @@ class ModelDemo(DBModel):
 ```python
 ModelDemo().where('id', 4).select('id', 'name').take(5).get()
 ```
+
+## 其他
+欢迎志同道合的朋友一起参与本项目开发SQLServer、PostgreSQL开发, 联系方式: 490573621@qq.com

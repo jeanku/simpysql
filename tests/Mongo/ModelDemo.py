@@ -60,7 +60,7 @@ if __name__ == '__main__':
     # data = ModelDemo1().where('gateway', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
     # data = ModelDemo1().where('gateway', '=', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
     #
-    data = ModelDemo1().where('gateway', '=', 'MAIN_ENGINE').select('content', 'time', 'gateway').first()
+    # data = ModelDemo1().where('gateway', '=', 'MAIN_ENGINE').select('content', 'time', 'gateway').first()
     # data = ModelDemo1().where('gateway', '<=', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
     # data = ModelDemo1().where('gateway', '<', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
     # data = ModelDemo1().where('gateway', '>', 'MAIN_ENGINE').select('content', 'time', 'gateway').get()
@@ -114,5 +114,4 @@ if __name__ == '__main__':
 
     # print(data)
     # exit(0)
-
     pass

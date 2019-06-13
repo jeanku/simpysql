@@ -4,6 +4,7 @@
 from ..Util.Config import config
 from ..Eloquent.MysqlBuilder import MysqlBuilder
 from ..Eloquent.MongoBuilder import MongoBuilder
+from ..Eloquent.SqlServerBuilder import SqlServerBuilder
 
 
 class BuilderFactory(object):
@@ -27,6 +28,8 @@ class BuilderFactory(object):
             return MysqlBuilder(model, alias)
         elif db_type == 'mongodb':
             return MongoBuilder(model)
+        elif db_type == 'sqlserver':
+            return SqlServerBuilder(model, alias)
         raise Exception('Unsupported driver {}'.format(db_type))
 
 
