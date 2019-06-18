@@ -90,7 +90,8 @@ class MysqlBuilder(BaseBuilder):
         return data['aggregate'] if data else None
 
     def exist(self):
-        return True if self.count() > 0 else False
+        self.__limit__ = 1
+        return True if len(self.get()) > 0 else False
 
     def update(self, data):
         if data and isinstance(data, dict):
@@ -273,6 +274,11 @@ class MysqlBuilder(BaseBuilder):
     def subquery(self, model, alias='tmp'):
         self.__subquery__.append((alias, model))
         return self
+
+    def create_or_update(self, data):
+        if self.exist():
+            return self.update(data)
+        return self.create(data)
 
     def _compile_select(self):
         if len(self.__select__) == 0:

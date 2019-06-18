@@ -267,6 +267,12 @@ data = ModelDemo().select('a.id', 'a.name').subquery('lh_test', 'a').subquery(su
     .where('a.id', 'b.id').where('a.id', '>', '45').take(5).get()
 ```
 
+# Select 复合查询
+``` python
+# name='hehe1234'是否存在，不存在则添加， 有则更新
+ModelDemo().where('name', 'hehe1234').create_or_update({'name': "hehe1234", 'token_name': "haha124"})
+``` 
+
 # 返回结果&属性访问
 ``` python
 # 返回单条数据 dict: {'id': 50}
