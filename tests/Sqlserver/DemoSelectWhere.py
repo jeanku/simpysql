@@ -11,6 +11,8 @@ from tests.Sqlserver.BaseModel import BaseModel
 class ModelDemo(BaseModel):
     __tablename__ = 'zz_user'  # 表名
 
+    __database__ = 'sqlserver'
+
     __create_time__ = 'create_time'  # 插入时间字段 如果该字段为None create_time则不会自动添加
 
     __update_time__ = 'update_time'  # 更新时间字段 如果该字段为None create_time则不会自动添加
