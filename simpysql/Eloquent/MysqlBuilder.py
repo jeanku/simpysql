@@ -124,6 +124,13 @@ class MysqlBuilder(BaseBuilder):
         self._get_connection().execute(self._compile_insert(columns, data))
         return self
 
+    def replace(self, data):
+        if data:
+            if data and isinstance(data, dict):
+                data = self._set_create_time([data])
+                return self._get_connection().execute(self._compile_replace(data))
+        return self
+
     def lastid(self):
         data = self._get_connection().execute(self._compile_lastid())
         return data[0][0] if data and data[0] and data[0][0] else None
@@ -294,6 +301,9 @@ class MysqlBuilder(BaseBuilder):
 
     def _compile_create(self, data):
         return "insert into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
+
+    def _compile_replace(self, data):
+        return "replace into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
 
     def _compile_insert(self, columns, data):
         return "insert into {} {} values {}".format(self._tablename(), self._columnize(columns), ','.join([tuple(index).__str__() for index in data]))

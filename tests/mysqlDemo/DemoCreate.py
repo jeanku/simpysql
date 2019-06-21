@@ -39,6 +39,4 @@ if __name__ == '__main__':
     # # insert into lh_test (`name`, `token_name`) values ('haha1', 'haha125'),('haha1', 'haha124')
     ModelDemo().insert(['name', 'token_name'], [['haha1', 'haha125'], ['haha1', 'haha124']])
     #
-    # # 没有则添加， 有则更新
-    ModelDemo().where('name', 'hehe1234').create_or_update({'name': "hehe1234", 'token_name': "haha124"})
     pass

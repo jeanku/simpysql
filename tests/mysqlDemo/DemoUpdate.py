@@ -35,4 +35,10 @@ if __name__ == '__main__':
     data = ModelDemo().where('id', 117).increment('status')  # 字段自增3
     data = ModelDemo().where('id', 117).increment('status', 3)  # 字段自增3
 
+    # replace into lh_test (`id`, `name`, `token_name`) values (136, 'hehe12', 'haha12')
+    data = ModelDemo().replace({'id': 136, 'name': "hehe12", 'token_name': 'haha12'})  # 字段自增3
+
+    # # 没有则添加， 有则更新
+    ModelDemo().where('name', 'hehe1234').create_or_update({'name': "hehe1234", 'token_name': "haha124"})
+
     exit(0)
