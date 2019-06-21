@@ -101,14 +101,14 @@ class MysqlBuilder(BaseBuilder):
     def increment(self, key, amount=1):
         if isinstance(amount, int) and amount > 0:
             data = collections.defaultdict(dict)
-            data[key] = '{}+{}'.format(expr.format_column(key), str(amount))
+            data[key] = '{}+{}'.format(expr.format_column(key, self.__model__), str(amount))
             data = self._set_update_time(data)
             return self._get_connection().execute(self._compile_increment(data))
 
     def decrement(self, key, amount=1):
         if isinstance(amount, int) and amount > 0:
             data = collections.defaultdict(dict)
-            data[key] = '{}-{}'.format(expr.format_column(key), str(amount))
+            data[key] = '{}-{}'.format(expr.format_column(key, self.__model__), str(amount))
             data = self._set_update_time(data)
             return self._get_connection().execute(self._compile_increment(data))
 
@@ -202,9 +202,9 @@ class MysqlBuilder(BaseBuilder):
 
     def orderby(self, column, direction='asc'):
         if direction.lower() == 'asc':
-            self.__orderby__.append(expr.format_column(column))
+            self.__orderby__.append(expr.format_column(column, self.__model__))
         else:
-            self.__orderby__.append(expr.format_column(column) + ' desc')
+            self.__orderby__.append(expr.format_column(column, self.__model__) + ' desc')
         return self
 
     def execute(self, sql):
@@ -302,7 +302,7 @@ class MysqlBuilder(BaseBuilder):
         return "update {} set {}{}".format(self._tablename(), ','.join(self._compile_dict(data)), self._compile_where())
 
     def _compile_increment(self, data):
-        subsql = ','.join(['{}={}'.format(expr.format_column(index), value) for index, value in data.items()])
+        subsql = ','.join(['{}={}'.format(expr.format_column(index, self.__model__), value) for index, value in data.items()])
         return "update {} set {}{}".format(self._tablename(), subsql, self._compile_where())
 
     def _compile_delete(self):
@@ -417,17 +417,17 @@ class MysqlBuilder(BaseBuilder):
         return ''
 
     def _compile_dict(self, data):
-        return ['{}={}'.format(expr.format_column(index), expr.format_string(value)) for index, value in data.items()]
+        return ['{}={}'.format(expr.format_column(index, self.__model__), expr.format_string(value)) for index, value in data.items()]
 
     def _compile_tuple(self, data):
         if data[1] in ['in', 'not in']:
             return self._compile_in((data[0], data[1], data[2]))
         elif data[1] in ['between', 'not between']:
             return self._compile_between((data[0], data[1], data[2]))
-        return '{} {} {}'.format(expr.format_column(data[0]), data[1], expr.format_string(data[2]))
+        return '{} {} {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.format_string(data[2]))
 
     def _compile_in(self, data):
-        return '{} {} {}'.format(expr.format_column(data[0]), data[1], expr.list_to_str(data[2]))
+        return '{} {} {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.list_to_str(data[2]))
 
     def _compile_list(self, data):
         length = len(data)
@@ -448,11 +448,11 @@ class MysqlBuilder(BaseBuilder):
     def _compile_between(self, data):
         if not (len(data) == 3 and len(data[2]) == 2):
             raise Exception('between param invalid')
-        return '{} {} {} and {}'.format(expr.format_column(data[0]), data[1], expr.format_string(data[2][0]),
+        return '{} {} {} and {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.format_string(data[2][0]),
                                                      expr.format_string(data[2][1]))
 
     def _compile_keyvalue(self, key, value):
-        return '{}={}'.format(expr.format_column(key), expr.format_string(value))
+        return '{}={}'.format(expr.format_column(key, self.__model__), expr.format_string(value))
 
     def _compile_subquery(self):
         subquery = []
@@ -488,7 +488,7 @@ class MysqlBuilder(BaseBuilder):
         return self.__model__.__tablename__ + ' as {}'.format(self.__alias__)
 
     def _format_columns(self, columns):
-        return list(map(lambda index: expr.format_column(index), columns))
+        return list(map(lambda index: expr.format_column(index, self.__model__), columns))
 
     def _set_create_time(self, data):
         currtime = self.__model__.fresh_timestamp()

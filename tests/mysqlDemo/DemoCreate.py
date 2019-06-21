@@ -31,14 +31,14 @@ if __name__ == '__main__':
 
     # 添加数据 并获取插入的自增ID
     lastid = ModelDemo().create({'name': "haha1", 'token_name': "haha'125"}).lastid()
-    print(lastid)
-
-    # 批量插入
+    # print(lastid)
+    #
+    # # 批量插入
     ModelDemo().create([{'name': "haha1", 'token_name': 'haha124'}, {'name': "haha2", 'token_name': 'haha125'}])
-
-    # insert into lh_test (`name`, `token_name`) values ('haha1', 'haha125'),('haha1', 'haha124')
+    #
+    # # insert into lh_test (`name`, `token_name`) values ('haha1', 'haha125'),('haha1', 'haha124')
     ModelDemo().insert(['name', 'token_name'], [['haha1', 'haha125'], ['haha1', 'haha124']])
-
-    # 没有则添加， 有则更新
+    #
+    # # 没有则添加， 有则更新
     ModelDemo().where('name', 'hehe1234').create_or_update({'name': "hehe1234", 'token_name': "haha124"})
     pass
