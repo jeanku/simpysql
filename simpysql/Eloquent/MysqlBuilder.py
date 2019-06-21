@@ -126,9 +126,13 @@ class MysqlBuilder(BaseBuilder):
 
     def replace(self, data):
         if data:
-            if data and isinstance(data, dict):
-                data = self._set_create_time([data])
+            if isinstance(data, dict):
+                data = [data]
+            if isinstance(data, list):
+                data = self._set_create_time(data)
                 return self._get_connection().execute(self._compile_replace(data))
+            else:
+                raise Exception('replace param invalid exception')
         return self
 
     def lastid(self):
