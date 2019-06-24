@@ -96,6 +96,7 @@ class MysqlBuilder(BaseBuilder):
     def update(self, data):
         if data and isinstance(data, dict):
             data = self._set_update_time(data)
+            data = {key: value for key, value in data.items() if key in self.__model__.columns}
             return self._get_connection().execute(self._compile_update(data))
 
     def increment(self, key, amount=1):
@@ -115,7 +116,7 @@ class MysqlBuilder(BaseBuilder):
     def create(self, data):
         if data:
             if data and isinstance(data, dict):
-                data = [data]
+                data = [{key: value for key, value in data.items() if key in self.__model__.columns}]
             data = self._set_create_time(data)
             self._get_connection().execute(self._compile_create(data))
         return self

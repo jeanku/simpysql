@@ -27,16 +27,16 @@ class ModelDemo(BaseModel):
 
 if __name__ == '__main__':
     # update lh_test set name='hehe',token_name='haha4123',update_time=1559534994 where id=117
-    # ModelDemo().where('id', 117).update({'name': "hehe", 'token_name': 'haha4123'})
-    #
-    # data = ModelDemo().where('id', 117).decrement('status')  # 字段自增1
-    # data = ModelDemo().where('id', 117).decrement('status', 3)  # 字段自减3
-    #
-    # data = ModelDemo().where('id', 117).increment('status')  # 字段自增3
-    # data = ModelDemo().where('id', 117).increment('status', 3)  # 字段自增3
+    ModelDemo().where('id', 117).update({'name': "hehe", 'token_name': 'haha4123',  'token_name1': 'haha4123'})
+
+    data = ModelDemo().where('id', 117).decrement('status')  # 字段自增1
+    data = ModelDemo().where('id', 117).decrement('status', 3)  # 字段自减3
+
+    data = ModelDemo().where('id', 117).increment('status')  # 字段自增3
+    data = ModelDemo().where('id', 117).increment('status', 3)  # 字段自增3
 
     # replace into lh_test (`id`, `name`, `token_name`) values (136, 'hehe12', 'haha12')
-    data = ModelDemo().replace([{'id': 137, 'name': "hehe77", 'token_name': 'haha77'}, {'id': 138, 'name': "hehe11", 'token_name': 'haha11'}])  # 字段自增3
+    # data = ModelDemo().replace([{'id': 137, 'name': "hehe77", 'token_name': 'haha77'}, {'id': 138, 'name': "hehe11", 'token_name': 'haha11'}])  # 字段自增3
 
     # # 没有则添加， 有则更新
     # ModelDemo().where('name', 'hehe1234').create_or_update({'name': "hehe1234", 'token_name': "haha124"})
