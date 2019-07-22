@@ -29,8 +29,8 @@ class MongoConnection(Connection):
     def create(self, builder, data):
         return self.db(builder._tablename()).insert(data)
 
-    def update(self, builder, data):
-        return self.db(builder._tablename()).update_many(builder.__where__, data)
+    def update(self, builder, data, **kwargs):
+        return self.db(builder._tablename()).update_many(builder.__where__, data, **kwargs)
 
     def delete(self, builder):
         return self.db(builder._tablename()).delete_many(builder.__where__)
