@@ -9,7 +9,9 @@ class Expression(object):
     def __init__(self, name=None):
         self.__name = name
 
-    def format_column(self, key):
+    def format_column(self, key, model=None):
+        if model is not None and model.columns and key in model.columns:
+            return '`{}`'.format(key)
         return key
 
     def format_string(self, key):

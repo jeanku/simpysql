@@ -27,6 +27,9 @@ class ConnectionFactory(object):
             return MysqlConnection.instance(database, self.parse_config(database))
         elif db_type == 'mongodb':
             return MongoConnection.instance(database, self.parse_config(database))
+        elif db_type == 'sqlserver':
+            from .SqlServerConnection import SqlServerConnection
+            return SqlServerConnection.instance(database, self.parse_config(database))
         raise Exception('Unsupported driver {}'.format(database))
 
     def parse_config(self, database):

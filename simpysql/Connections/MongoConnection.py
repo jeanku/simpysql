@@ -21,11 +21,19 @@ class MongoConnection(Connection):
 
     def get(self, builder):
         _select = dict(builder.__select__) if builder.__select__ else None
-        model = self.db(builder._tablename()).find(builder.__where__, _select).limit(builder.__limit__)
+        model = self.db(builder._tablename()).find(builder.__where__, _select).skip(builder.__offset__).limit(builder.__limit__)
         if builder.__orderby__:
-            print(builder.__orderby__)
             model = model.sort(builder.__orderby__)
         return list(model)
+
+    def create(self, builder, data):
+        return self.db(builder._tablename()).insert(data)
+
+    def update(self, builder, data):
+        return self.db(builder._tablename()).update_many(builder.__where__, data)
+
+    def delete(self, builder):
+        return self.db(builder._tablename()).delete_many(builder.__where__)
 
     def db(self, tablename):
         return self.connect()[tablename]

@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 
 import collections
-from pymysql.cursors import DictCursor
 from simpysql.Util.Expression import expression as expr, Expression
 from simpysql.Util.Response import Response
 from .BaseBuilder import BaseBuilder
 from simpysql.Util.Dynamic import Dynamic
 
 
-class MysqlBuilder(BaseBuilder):
+class SqlServerBuilder(BaseBuilder):
     operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',
         'like', 'like binary', 'not like', 'between', 'ilike',
@@ -26,7 +25,7 @@ class MysqlBuilder(BaseBuilder):
         self.__orwhere__ = []                           # orwhere处理逻辑
         self.__whereor__ = []                           # orwhere处理逻辑
         self.__select__ = []                            # 检索的字段
-        self.__limit__ = None                           # 检索的数据条数
+        self.__limit__ = 0                              # 检索的数据条数
         self.__orderby__ = []                           # 排序字段
         self.__groupby__ = []                           # 排序字段
         self.__offset__ = None                          # offset
@@ -44,96 +43,89 @@ class MysqlBuilder(BaseBuilder):
             return data.pop()
         return data
 
+    def one(self):
+        data = self.get()
+        if data:
+            return data.pop()
+        return data
+
     def get(self):
-        return [Dynamic(index) for index in self._get_connection().execute(self._compile_select(), DictCursor)]
+        return [Dynamic(index) for index in self._get_connection().execute(self._compile_select())]
 
     def lists(self, columns):
-        return Response(self._get_connection().execute(self._compile_select(), DictCursor)).tolist(columns)
+        return Response(self._get_connection().execute(self._compile_select())).tolist(columns)
 
     def data(self):
-        return Response(self._get_connection().execute(self._compile_select(), DictCursor)).data()
+        return Response(self._get_connection().execute(self._compile_select())).data()
 
     def response(self):
-        return Response(self._get_connection().execute(self._compile_select(), DictCursor))
+        return Response(self._get_connection().execute(self._compile_select()))
 
     def max(self, column):
         if isinstance(column, str) and column in self.__model__.columns:
             self.__select__ = ['max({}) as aggregate'.format(column)]
-            data = self.first()
+            data = self.one()
             return data['aggregate'] if data else None
         raise Exception('param invalid in function max')
 
     def min(self, column):
         if isinstance(column, str) and column in self.__model__.columns:
             self.__select__ = ['min({}) as aggregate'.format(column)]
-            data = self.first()
+            data = self.one()
             return data['aggregate'] if data else None
         raise Exception('param invalid in function min')
 
     def avg(self, column):
         if isinstance(column, str) and column in self.__model__.columns:
             self.__select__ = ['avg({}) as aggregate'.format(column)]
-            data = self.first()
+            data = self.one()
             return data['aggregate'] if data else None
         raise Exception('param invalid in function avg')
 
     def sum(self, column):
         if isinstance(column, str) and column in self.__model__.columns:
             self.__select__ = ['sum({}) as aggregate'.format(column)]
-            data = self.first()
+            data = self.one()
             return data['aggregate'] if data else None
         raise Exception('param invalid in function sum')
 
     def count(self):
         self.__select__ = ['count(*) as aggregate']
-        data = self.first()
+        data = self.one()
         return data['aggregate'] if data else None
 
     def exist(self):
-        self.__limit__ = 1
-        return True if len(self.get()) > 0 else False
+        return True if self.count() > 0 else False
 
     def update(self, data):
         if data and isinstance(data, dict):
             data = self._set_update_time(data)
-            data = {key: value for key, value in data.items() if key in self.__model__.columns}
             return self._get_connection().execute(self._compile_update(data))
 
     def increment(self, key, amount=1):
         if isinstance(amount, int) and amount > 0:
             data = collections.defaultdict(dict)
-            data[key] = '{}+{}'.format(expr.format_column(key, self.__model__), str(amount))
+            data[key] = '{}+{}'.format(expr.format_column(key), str(amount))
             data = self._set_update_time(data)
             return self._get_connection().execute(self._compile_increment(data))
 
     def decrement(self, key, amount=1):
         if isinstance(amount, int) and amount > 0:
             data = collections.defaultdict(dict)
-            data[key] = '{}-{}'.format(expr.format_column(key, self.__model__), str(amount))
+            data[key] = '{}-{}'.format(expr.format_column(key), str(amount))
             data = self._set_update_time(data)
             return self._get_connection().execute(self._compile_increment(data))
 
     def create(self, data):
         if data:
             if data and isinstance(data, dict):
-                data = [{key: value for key, value in data.items() if key in self.__model__.columns}]
+                data = [data]
             data = self._set_create_time(data)
             self._get_connection().execute(self._compile_create(data))
         return self
 
     def insert(self, columns, data):
         self._get_connection().execute(self._compile_insert(columns, data))
-        return self
-
-    def replace(self, data):
-        if data:
-            if isinstance(data, dict):
-                data = [data]
-            if isinstance(data, list):
-                data = self._set_create_time(data)
-                return self._get_connection().execute(self._compile_replace(data))
-            else:
-                raise Exception('replace param invalid exception')
         return self
 
     def lastid(self):
@@ -214,9 +206,9 @@ class MysqlBuilder(BaseBuilder):
 
     def orderby(self, column, direction='asc'):
         if direction.lower() == 'asc':
-            self.__orderby__.append(expr.format_column(column, self.__model__))
+            self.__orderby__.append(expr.format_column(column))
         else:
-            self.__orderby__.append(expr.format_column(column, self.__model__) + ' desc')
+            self.__orderby__.append(expr.format_column(column) + ' desc')
         return self
 
     def execute(self, sql):
@@ -287,28 +279,20 @@ class MysqlBuilder(BaseBuilder):
         self.__subquery__.append((alias, model))
         return self
 
-    def create_or_update(self, data):
-        if self.exist():
-            return self.update(data)
-        return self.create(data)
-
     def _compile_select(self):
         if len(self.__select__) == 0:
             self.__select__.append('*')
         subsql = ''.join(
             [self._compile_where(), self._compile_whereor(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(),
-             self._compile_having(), self._compile_limit(), self._compile_offset(), self._compile_lock()])
+             self._compile_having(), self._compile_offset(), self._compile_lock()])
         joinsql = ''.join(self._compile_leftjoin())
-        returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(), joinsql, subsql)
+        returnsql = "select {}{} from {}{}{}".format(self._compile_limit(), ','.join(self.__select__), self._tablename(), joinsql, subsql)
         if self.__union__:
             return '{}'.format(returnsql) + self._compile_union()
         return returnsql
 
     def _compile_create(self, data):
         return "insert into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
-
-    def _compile_replace(self, data):
-        return "replace into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
 
     def _compile_insert(self, columns, data):
         return "insert into {} {} values {}".format(self._tablename(), self._columnize(columns), ','.join([tuple(index).__str__() for index in data]))
@@ -317,7 +301,7 @@ class MysqlBuilder(BaseBuilder):
         return "update {} set {}{}".format(self._tablename(), ','.join(self._compile_dict(data)), self._compile_where())
 
     def _compile_increment(self, data):
-        subsql = ','.join(['{}={}'.format(expr.format_column(index, self.__model__), value) for index, value in data.items()])
+        subsql = ','.join(['{}={}'.format(expr.format_column(index), value) for index, value in data.items()])
         return "update {} set {}{}".format(self._tablename(), subsql, self._compile_where())
 
     def _compile_delete(self):
@@ -339,10 +323,14 @@ class MysqlBuilder(BaseBuilder):
         return '' if len(self.__orderby__) == 0 else ' order by ' + ','.join(self.__orderby__)
 
     def _compile_limit(self):
-        return '' if self.__limit__ is None else ' limit {}'.format(self.__limit__)
+        return '' if self.__limit__ == 0 else 'top ({}) '.format(self.__limit__)
 
     def _compile_offset(self):
-        return '' if self.__offset__ is None else ' offset {}'.format(self.__offset__)
+        if self.__offset__:
+            if self.__orderby__:
+                return '' if self.__offset__ is None else ' offset {} rows fetch next {} rows only'.format(self.__offset__, self.__limit__)
+            raise Exception('orderby function not set exception')
+        return ''
 
     def _compile_lock(self):
         return '' if self.__lock__ is None else self.__lock__
@@ -432,17 +420,17 @@ class MysqlBuilder(BaseBuilder):
         return ''
 
     def _compile_dict(self, data):
-        return ['{}={}'.format(expr.format_column(index, self.__model__), expr.format_string(value)) for index, value in data.items()]
+        return ['{}={}'.format(expr.format_column(index), expr.format_string(value)) for index, value in data.items()]
 
     def _compile_tuple(self, data):
         if data[1] in ['in', 'not in']:
             return self._compile_in((data[0], data[1], data[2]))
         elif data[1] in ['between', 'not between']:
             return self._compile_between((data[0], data[1], data[2]))
-        return '{} {} {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.format_string(data[2]))
+        return '{} {} {}'.format(expr.format_column(data[0]), data[1], expr.format_string(data[2]))
 
     def _compile_in(self, data):
-        return '{} {} {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.list_to_str(data[2]))
+        return '{} {} {}'.format(expr.format_column(data[0]), data[1], expr.list_to_str(data[2]))
 
     def _compile_list(self, data):
         length = len(data)
@@ -463,11 +451,11 @@ class MysqlBuilder(BaseBuilder):
     def _compile_between(self, data):
         if not (len(data) == 3 and len(data[2]) == 2):
             raise Exception('between param invalid')
-        return '{} {} {} and {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.format_string(data[2][0]),
+        return '{} {} {} and {}'.format(expr.format_column(data[0]), data[1], expr.format_string(data[2][0]),
                                                      expr.format_string(data[2][1]))
 
     def _compile_keyvalue(self, key, value):
-        return '{}={}'.format(expr.format_column(key, self.__model__), expr.format_string(value))
+        return '{}={}'.format(expr.format_column(key), expr.format_string(value))
 
     def _compile_subquery(self):
         subquery = []
@@ -503,7 +491,7 @@ class MysqlBuilder(BaseBuilder):
         return self.__model__.__tablename__ + ' as {}'.format(self.__alias__)
 
     def _format_columns(self, columns):
-        return list(map(lambda index: expr.format_column(index, self.__model__), columns))
+        return list(map(lambda index: expr.format_column(index), columns))
 
     def _set_create_time(self, data):
         currtime = self.__model__.fresh_timestamp()

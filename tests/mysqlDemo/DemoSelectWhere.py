@@ -26,6 +26,7 @@ class ModelDemo(BaseModel):
 
 
 if __name__ == '__main__':
+
     # select * from lh_test where id=117
     data = ModelDemo().where('id', 117).get()
     data = ModelDemo().where({'id': 117}).get()
@@ -82,7 +83,17 @@ if __name__ == '__main__':
     data = ModelDemo().select('count(*) as num', 'name').groupby('name').having('num', 2).get()
     # select name from lh_test having left(name, 4) = 'haha'
     data = ModelDemo().select('name').having('left(name, 4)', '=', 'haha').get()
+    
+    # 聚合查询
+    data = ModelDemo('a').where('id', '>', 163).count()
+    data = ModelDemo('a').where('id', '>', 63).max('id')
+    data = ModelDemo('a').where('id', '>', 63).min('id')
+    data = ModelDemo('a').where('id', '>', 63).avg('id')
+    data = ModelDemo('a').where('id', '>', 63).sum('id')
 
+    # 判断记录是否存在
+    data = ModelDemo('a').where('id', '>', 63).exist()
+    
     # 锁(共享所和排他锁)
     # select * from lh_test limit 1 for update
     data = ModelDemo().lock_for_update().get()
@@ -95,4 +106,6 @@ if __name__ == '__main__':
     # 表名设置别名
     # select a.name,a.token_name from lh_test as a where id=62
     data = ModelDemo('a').select('a.name', 'a.token_name').where('id', 62).get()
+
+    print(data)
     exit(0)

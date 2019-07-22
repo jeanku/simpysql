@@ -35,11 +35,11 @@ if __name__ == '__main__':
     # 返回单条数据 list: [50 55 56 57 58]
     data = ModelDemo().where('id', '>=', 50).take(5).lists('id')
 
-    # 返回单条数据 list: [[50 'haha'] [55 'haha'] [56 'haha'] [57 'haha'] [58 'haha']]
+    # 返回单条数据 list: [[50, 'haha'] [55, 'haha'] [56, 'haha'] [57, 'haha'] [58, 'haha']]
     data = ModelDemo().where('id', '>=', 50).take(5).lists(['id', 'name'])
 
     # 返回pandas dataFrame / None
-    data = ModelDemo().where('id', '>=', 1150).take(5).data()
+    data = ModelDemo().where('id', '>=', 50).take(5).data()
 
     print(data)
     exit(0)

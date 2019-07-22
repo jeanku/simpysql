@@ -4,13 +4,15 @@
 from ..Util.Expression import expression as expr
 from ..Util.Response import Response
 from .BaseBuilder import BaseBuilder
+from simpysql.Util.Dynamic import Dynamic
 import pymongo
 
 
 class MongoBuilder(BaseBuilder):
     operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',
-        'like', 'in', 'not in', 'not between', 'exist'
+        'like', 'in', 'not in', 'not between', 'exist',
+        'not like', 'ilike', 'not ilike', 'between', 'mod', 'all', 'size'
     ]
     operators_map = {
         '<': '$lt',
@@ -21,7 +23,13 @@ class MongoBuilder(BaseBuilder):
         'in': '$in',
         'not in': '$nin',
         'like': '$regex',
+        'ilike': '$regex',
+        'not like': '$regex',
+        'not ilike': '$regex',
         'exist': '$exist',
+        'mod': '$mod',
+        'all': '$all',
+        'size': '$size',
     }
 
     def __init__(self, model, alias=None):
@@ -32,7 +40,7 @@ class MongoBuilder(BaseBuilder):
         self.__limit__ = 0  # 检索的数据条数
         self.__orderby__ = []  # 排序字段
         self.__groupby__ = []  # 排序字段
-        self.__offset__ = None  # offset
+        self.__offset__ = 0    # offset
         self.__lock__ = None  # lock
         self.__join__ = []  # leftjoin
         self.__union__ = []  # union & unionall
@@ -47,7 +55,7 @@ class MongoBuilder(BaseBuilder):
         return data
 
     def get(self):
-        return self._get_connection().get(self)
+        return [Dynamic(index) for index in self._get_connection().get(self)]
 
     def lists(self, columns):
         return Response(self.get()).tolist(columns)
@@ -64,18 +72,19 @@ class MongoBuilder(BaseBuilder):
     def update(self, data):
         if data and isinstance(data, dict):
             data = self._set_update_time(data)
-            return self._get_connection().execute(self._compile_update(data))
+            return self._get_connection().update(self, {'$set': data})
+        return None
 
     def create(self, data):
         if data:
-            if data and isinstance(data, dict):
+            if isinstance(data, dict):
                 data = [data]
             data = self._set_create_time(data)
-            self._get_connection().execute(self._compile_create(data))
-        return self
+            return self._get_connection().create(self, data)
+        return None
 
     def delete(self):
-        return self._get_connection().execute(self._compile_delete())
+        return self._get_connection().delete(self)
 
     def take(self, number):
         if number <= 0:
@@ -113,7 +122,7 @@ class MongoBuilder(BaseBuilder):
                 if args[1] == '=':
                     self.__where__['$and'].append({args[0]: args[2]})
                 else:
-                    self.__where__['$and'].append({args[0]: {self.operators_map[args[1]]: args[2]}})
+                    self.__where__['$and'].append(self._compile_tuple((args[0], args[1], args[2])))
             else:
                 raise Exception('operator key world not found: "{}"'.format(args[1]))
         else:
@@ -124,9 +133,12 @@ class MongoBuilder(BaseBuilder):
         if self.__where__.get('$or', None) is None:
             self.__where__['$or'] = []
         length = args.__len__()
-        if length == 1 and isinstance(args[0], list):
-            for index in args[0]:
-                self.__where__['$or'].append(self._compile(index))
+        if length == 1:
+            if isinstance(args[0], list):
+                for index in args[0]:
+                    self.__where__['$or'].append(self._compile(index))
+            elif isinstance(args[0], dict):
+                self.__where__['$or'].append(self._compile(args[0]))
         else:
             self.__where__['$or'].append(self._compile(args))
         return self
@@ -155,20 +167,26 @@ class MongoBuilder(BaseBuilder):
                 if data[1] == '=':
                     return {data[0]: data[2]}
                 else:
-                    return {{data[0]: {self.operators_map[data[1]]: data[2]}}}
+                    return {data[0]: {self.operators_map[data[1]]: data[2]}}
         raise Exception('bad parameters')
 
-    def _compile_select(self):
-        subsql = ''.join(
-            [self._compile_where(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(),
-             self._compile_having(),
-             self._compile_limit(),
-             self._compile_offset(), self._compile_lock()])
-        joinsql = ''.join(self._compile_leftjoin())
-        returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(), joinsql, subsql)
-        if self.__union__:
-            return '({})'.format(returnsql) + ' union ' + self._compile_union()
-        return returnsql
+    def _compile_tuple(self, data):
+        if data[1] == 'not like':
+            return {data[0]: {self.operators_map[data[1]]: '^((?!{}).)*$'.format(data[2])}}
+        elif data[1] == 'ilike':
+            return {data[0]: {self.operators_map[data[1]]: data[2], '$options': 'i'}}
+        elif data[1] == 'not ilike':
+            return {data[0]: {self.operators_map[data[1]]: '^((?!{}).)*$'.format(data[2]), '$options': 'i'}}
+        elif data[1] == 'between':
+            if len(data[2]) != 2:
+                raise Exception('between param error')
+            return {data[0]: {'$lte': data[2][1], '$gte': data[2][0]}}
+        elif data[1] == 'not between':
+            if len(data[2]) != 2:
+                raise Exception('not between param error')
+            return {'$or': [{data[0]: {'$gt': data[2][1]}}, {data[0]: {'$lt': data[2][0]}}]}
+        else:
+            return {data[0]: {self.operators_map[data[1]]: data[2]}}
 
     def _get_connection(self):
         return self.connect(self.__model__)
