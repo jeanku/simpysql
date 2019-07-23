@@ -77,9 +77,9 @@ class MongoBuilder(BaseBuilder):
 
     def replace(self, data, **kwargs):
         if self.first():
-            self.update(self._set_update_time(data))
+            self.update(data, **kwargs)
         else:
-            self.create(self._set_create_time(data))
+            self.create(data)
 
     def create(self, data):
         if data:
