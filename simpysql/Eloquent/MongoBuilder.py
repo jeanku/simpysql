@@ -40,7 +40,7 @@ class MongoBuilder(BaseBuilder):
         self.__limit__ = 0  # 检索的数据条数
         self.__orderby__ = []  # 排序字段
         self.__groupby__ = []  # 排序字段
-        self.__offset__ = 0    # offset
+        self.__offset__ = 0  # offset
         self.__lock__ = None  # lock
         self.__join__ = []  # leftjoin
         self.__union__ = []  # union & unionall
@@ -72,10 +72,10 @@ class MongoBuilder(BaseBuilder):
     def count(self):
         return self._get_connection().count(self)
 
-    def update(self, data):
+    def update(self, data,**kwargs):
         if data and isinstance(data, dict):
             data = self._set_update_time(data)
-            return self._get_connection().update(self, {'$set': data})
+            return self._get_connection().update(self, {'$set': data}, **kwargs)
         return None
 
     def create(self, data):
