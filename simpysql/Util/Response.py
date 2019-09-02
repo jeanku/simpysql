@@ -6,18 +6,28 @@ import pandas
 
 class Response(object):
 
-    def __init__(self, data):
-        self.__data__ = pandas.DataFrame(data) if data else None
+    def __init__(self, data=None):
+        self.__data__ = data
 
     def data(self):
-        return self.__data__
+        return pandas.DataFrame(self.__data__)
 
     def tolist(self, columns):
         if self.__data__ is not None:
-            return self.__data__[columns].values.tolist()
+            if type(columns) == str:
+                return [index[columns] for index in self.__data__]
+            elif type(columns) == list:
+                return [self._muti_select(index, columns) for index in self.__data__]
         return []
 
-    def pluck(self, key, vallue):
+    def pluck(self, key, value):
         if self.__data__ is not None:
-            return dict(self.__data__[[key, vallue]].values)
+            return {index[key]: index[value] for index in self.__data__}
         return {}
+
+    def _muti_select(self, dict, columns):
+        item = []
+        for index in columns:
+            item.append(dict[index])
+        return item
+
