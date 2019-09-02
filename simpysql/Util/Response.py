@@ -16,3 +16,8 @@ class Response(object):
         if self.__data__ is not None:
             return self.__data__[columns].values.tolist()
         return []
+
+    def pluck(self, key, vallue):
+        if self.__data__ is not None:
+            return dict(self.__data__[[key, vallue]].values)
+        return {}

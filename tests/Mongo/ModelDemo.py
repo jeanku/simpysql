@@ -53,9 +53,9 @@ class ModelDemo2(BaseModel):
 
 if __name__ == '__main__':
 
-    # data = ModelDemo1().select('content', 'time', 'gateway').data()
+    # data = ModelDemo1().select('content', 'time', 'gateway').take(10).pluck('time', 'gateway')
 
-    # select * from table where gateway = 'MAIN_ENGINE'
+    # # select * from table where gateway = 'MAIN_ENGINE'
     # data = ModelDemo1().where({'gateway': 'MAIN_ENGINE'}).select('content', 'time', 'gateway').data()
     # data = ModelDemo1().where('gateway', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
     # data = ModelDemo1().where('gateway', '=', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()

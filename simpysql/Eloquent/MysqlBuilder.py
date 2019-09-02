@@ -50,6 +50,9 @@ class MysqlBuilder(BaseBuilder):
     def lists(self, columns):
         return Response(self._get_connection().execute(self._compile_select(), DictCursor)).tolist(columns)
 
+    def pluck(self, key, value):
+        return Response(self._get_connection().execute(self._compile_select(), DictCursor)).pluck(key, value)
+
     def data(self):
         return Response(self._get_connection().execute(self._compile_select(), DictCursor)).data()
 

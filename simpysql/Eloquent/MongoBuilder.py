@@ -58,13 +58,16 @@ class MongoBuilder(BaseBuilder):
         return [Dynamic(index) for index in self._get_connection().get(self)]
 
     def lists(self, columns):
-        return Response(self.get()).tolist(columns)
+        return Response(self._get_connection().get(self)).tolist(columns)
+
+    def pluck(self, key, value):
+        return Response(self._get_connection().get(self)).pluck(key, value)
 
     def data(self):
-        return Response(self.get()).data()
+        return Response(self._get_connection().get(self)).data()
 
     def response(self):
-        return Response(self.get())
+        return Response(self._get_connection().get(self))
 
     def count(self):
         return self._get_connection().count(self)
