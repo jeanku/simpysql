@@ -148,6 +148,9 @@ data = ModelDemo().where('id', '>=', 50).take(5).lists('id')
 # 返回数据 list: [[50, 'haha'], [55, 'haha'], [56, 'haha'], [57, 'haha'], [58, 'haha']]
 data = ModelDemo().where('id', '>=', 50).take(5).lists(['id', 'name'])
 
+# 返回数据 key-value: {'14:08:38': 'MAIN_ENGINE', '14:11:37': 'MAIN_ENGINE', ...}
+data = ModelDemo1().select('content', 'time', 'gateway').take(10).pluck('time', 'gateway')
+
 # 返回pandas dataFrame / None
 data = ModelDemo().where('id', '>=', 1150).take(5).data()
 ```

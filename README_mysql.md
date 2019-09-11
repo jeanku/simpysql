@@ -297,6 +297,9 @@ data = ModelDemo().where('id', '>=', 50).take(5).lists('id')
 # 返回数据 list: [[50, 'haha'], [55, 'haha'], [56, 'haha'], [57, 'haha'], [58, 'haha']]
 data = ModelDemo().where('id', '>=', 50).take(5).lists(['id', 'name'])
 
+# 返回key-value {42: '555', 43: '44', 47: '444',...}
+data = ModelDemo().select('id', 'name').pluck('id', 'name')
+
 # 返回pandas dataFrame / None
 data = ModelDemo().where('id', '>=', 1150).take(5).data()
 ```

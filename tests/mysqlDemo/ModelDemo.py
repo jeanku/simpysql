@@ -152,8 +152,13 @@ if __name__ == '__main__':
 
     # 返回list
     # data = ModelDemo().select('id', 'name', 'status').lists(['id', 'name'])   # select `id`,`name` from lh_test limit 5
+    # data = ModelDemo().select('id', 'name', 'status').lists('id')   # select `id`,`name` from lh_test limit 5
+
     # data = ModelDemo().select('id', 'name', 'status').data()
     # data = ModelDemo().select('min(id) as minid').first()        # select min(id) as minid from lh_test limit 1
+
+    # 返回key-value
+    # data = ModelDemo().select('id', 'name').pluck('id', 'name')
 
     # groupby
     # select count(*) as num,`name` from lh_test group by `name`
@@ -283,5 +288,7 @@ if __name__ == '__main__':
     #     print(index)
 
     # data = ModelDemo3().select('blockNumber').where('blockNumber', -1).orderby('blockNumber', 'desc').take(10).lists('blockNumber')
-    # print(data)
+
+    data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').take(5).pluck('name', 'token_name')        # 取5条 并返回list
+    print(data)
     pass
