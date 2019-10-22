@@ -50,12 +50,23 @@ class ModelDemo2(BaseModel):
     # def fresh_timestamp(self):
     #     return datetime.datetime.now().strftime("%Y%m%d")
 
+class ModelDemo3(BaseModel):
+
+    __database__ = 'icoape_mongo'        # 表名
+
+    __tablename__ = 'meetup_events'    # 表名
+
+    __create_time__ = None  # 插入时间字段 如果该字段为None create_time则不会自动添加
+
+    __update_time__ = None  # 更新时间字段 如果该字段为None create_time则不会自动添加
+
+    columns = []
 
 if __name__ == '__main__':
 
     # data = ModelDemo1().select('content', 'time', 'gateway').take(10).pluck('time', 'gateway')
 
-    # # select * from table where gateway = 'MAIN_ENGINE'
+    # select * from table where gateway = 'MAIN_ENGINE'
     # data = ModelDemo1().where({'gateway': 'MAIN_ENGINE'}).select('content', 'time', 'gateway').data()
     # data = ModelDemo1().where('gateway', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
     # data = ModelDemo1().where('gateway', '=', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
@@ -114,4 +125,10 @@ if __name__ == '__main__':
 
     # print(data)
     # exit(0)
+
+    data = ModelDemo3().where('time', '>', 1561910400000).where('time', '<', 1564502400000).where('venue', 'exist', True).select('min(venue.country) as country', 'count(*) as count', 'venue.localized_country_name as country_name')\
+        .groupby('country_name').orderby('count').offset(0).take(3).get()
+    # data = ModelDemo3().select('min(venue.country)', 'count(*) as total', 'venue.localized_country_name as country_name')\
+
+    print(data)
     pass

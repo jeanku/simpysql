@@ -20,11 +20,24 @@ class MongoConnection(Connection):
         self._config = config
 
     def get(self, builder):
+        if builder.__groupby__.__len__() > 0:
+            return self.groupby(builder)
         _select = dict(builder.__select__) if builder.__select__ else None
         model = self.db(builder._tablename()).find(builder.__where__, _select).skip(builder.__offset__).limit(builder.__limit__)
         if builder.__orderby__:
             model = model.sort(builder.__orderby__)
         return list(model)
+
+    def groupby(self, builder):
+        aggre = [builder.where_to_match(), builder.__groupby__]
+        if builder.__orderby__.__len__() > 0:
+            aggre.append(builder._compile_aggregate_orderby())
+        if builder.__offset__ > 0:
+            aggre.append(builder._compile_aggregate_offset())
+        if builder.__limit__ > 0:
+            aggre.append(builder._compile_aggregate_limit())
+        aggre.append(builder._compile_aggregate_project())
+        return self.db(builder._tablename()).aggregate(aggre)
 
     def create(self, builder, data):
         return self.db(builder._tablename()).insert(data)

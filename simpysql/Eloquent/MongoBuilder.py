@@ -6,7 +6,7 @@ from ..Util.Response import Response
 from .BaseBuilder import BaseBuilder
 from simpysql.Util.Dynamic import Dynamic
 import pymongo
-
+import re
 
 class MongoBuilder(BaseBuilder):
     operators = [
@@ -26,7 +26,7 @@ class MongoBuilder(BaseBuilder):
         'ilike': '$regex',
         'not like': '$regex',
         'not ilike': '$regex',
-        'exist': '$exist',
+        'exist': '$exists',
         'mod': '$mod',
         'all': '$all',
         'size': '$size',
@@ -47,8 +47,10 @@ class MongoBuilder(BaseBuilder):
         self.__on__ = []  # leftjoin
         self.__having__ = None  # having
         self.__subquery__ = None  # subquery
+        self.__groupbykey__ = None  # mongo groupby 字段名
 
     def first(self):
+        self.__limit__ = 1
         data = self.get()
         if data:
             return data.pop()
@@ -100,12 +102,38 @@ class MongoBuilder(BaseBuilder):
         [self.__select__.update({index: 1}) for index in args]
         return self
 
-    def groupby(self, *args):
-        self.__groupby__ = self._format_columns(list(args))
+    def groupby(self, groupkey):
+        groupby = {
+            "$group": {}
+        }
+        if self.__select__.__len__() == 0:
+            raise Exception('invalid select filed')
+        for key, value in self.__select__.items():
+            if value == 1:
+                groupby['$group'].update(self.format_group_sql(key))
+        self.__select__ = {}
+        self.__groupby__ = groupby
+        self.__groupbykey__ = groupkey
         return self
 
+    def where_to_match(self):
+        return {'$match': self.__where__}
+
+    def _format_column(self, column):
+        return '$' + column
+
+    def format_group_sql(self, sqlstr):
+        p=r'([\w\.-_]*)(?:\(([a-zA-Z0-9.*]*)\))?(?:\s+as\s+(\w*))?'
+        temp = re.match(p, sqlstr).groups()
+        if temp[1] is None:
+            return {'_id': self._format_column(temp[0])}
+        if temp[0] == 'count':
+            return {temp[0] if temp[2] is None else temp[2]: {self._format_column('sum'): 1}}
+        else:
+            return {temp[0] if temp[2] is None else temp[2]: {self._format_column(temp[0]): self._format_column(temp[1])}}
+
     def offset(self, number):
-        if number <= 0:
+        if number < 0:
             raise Exception('offset number invalid')
         self.__offset__ = int(number)
         return self
@@ -190,6 +218,24 @@ class MongoBuilder(BaseBuilder):
             return {'$or': [{data[0]: {'$gt': data[2][1]}}, {data[0]: {'$lt': data[2][0]}}]}
         else:
             return {data[0]: {self.operators_map[data[1]]: data[2]}}
+
+    def _compile_aggregate_orderby(self):
+        temp = {}
+        for index in self.__orderby__:
+            temp[index[0]] = index[1]
+        return {'$sort': temp}
+
+    def _compile_aggregate_offset(self):
+        return {'$skip': self.__offset__}
+
+    def _compile_aggregate_limit(self):
+        return {'$limit': self.__limit__}
+
+    def _compile_aggregate_project(self):
+        temp = dict(zip(self.__groupby__['$group'].keys(), [1, 1, 1]))
+        temp['_id'] = 0
+        temp[self.__groupbykey__] = self._format_column('_id')
+        return {'$project': temp}
 
     def _get_connection(self):
         return self.connect(self.__model__)
