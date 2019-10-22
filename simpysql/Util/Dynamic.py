@@ -16,9 +16,9 @@ class Dynamic(dict):
     def __key(self, key):
         return "" if key is None else key.lower()
 
-    def __str__(self):
-        import json
-        return json.dumps(self)
+    # def __str__(self):
+    #     import json
+    #     return json.dumps(self)
 
     def __setattr__(self, key, value):
         self[self.__key(key)] = value
