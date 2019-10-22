@@ -74,11 +74,17 @@ class MongoBuilder(BaseBuilder):
     def count(self):
         return self._get_connection().count(self)
 
-    def update(self, data,**kwargs):
+    def update(self, data, **kwargs):
         if data and isinstance(data, dict):
             data = self._set_update_time(data)
             return self._get_connection().update(self, {'$set': data}, **kwargs)
         return None
+
+    def replace(self, data, **kwargs):
+        if self.first():
+            self.update(data, **kwargs)
+        else:
+            self.create(data)
 
     def create(self, data):
         if data:
