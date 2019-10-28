@@ -4,13 +4,13 @@
 """环境变量类"""
 
 __author__ = ''
-
+import decimal
 
 class Dynamic(dict):
     def __init__(self, d=None):
         if d is not None:
             for k, v in d.items():
-                self[k] = v
+                self[k] = str(v) if isinstance(v, decimal.Decimal) else v
         return super().__init__()
 
     def __key(self, key):
