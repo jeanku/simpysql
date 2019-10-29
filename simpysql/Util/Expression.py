@@ -25,7 +25,7 @@ class Expression(object):
 
     def list_to_str(self, data):
         if data and isinstance(data, list):
-            return tuple(data).__str__()
+            return '({})'.format(data[0]) if len(data) == 1 else tuple(data).__str__()
         if data and isinstance(data, tuple):
             return data.__str__()
         elif isinstance(data, BaseBuilder):
