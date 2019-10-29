@@ -5,7 +5,6 @@ from ..Util.Config import config
 from ..Eloquent.MysqlBuilder import MysqlBuilder
 from ..Eloquent.MongoBuilder import MongoBuilder
 from ..Eloquent.SqlServerBuilder import SqlServerBuilder
-from ..Eloquent.PostgresBuilder import PostgresBuilder
 
 
 class BuilderFactory(object):
@@ -13,8 +12,7 @@ class BuilderFactory(object):
 
     def make(self, model, alias=None):
         self.init_config(model.__basepath__)
-        database = model.__database__ if hasattr(model,
-                                                 '__database__') and model.__database__ is not None else 'default'
+        database = model.__database__ if hasattr(model, '__database__') and model.__database__ is not None else 'default'
         return self.create_builder(model, self.get_db_type(database), alias)
 
     def init_config(self, config_path: str) -> None:
@@ -32,8 +30,6 @@ class BuilderFactory(object):
             return MongoBuilder(model)
         elif db_type == 'sqlserver':
             return SqlServerBuilder(model, alias)
-        elif db_type == 'postgres':
-            return PostgresBuilder(model, alias)
         raise Exception('Unsupported driver {}'.format(db_type))
 
 

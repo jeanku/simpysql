@@ -11,7 +11,7 @@ class Expression(object):
 
     def format_column(self, key, model=None):
         if model is not None and model.columns and key in model.columns:
-            return '"{}"'.format(key)
+            return '`{}`'.format(key)
         return key
 
     def format_string(self, key):
