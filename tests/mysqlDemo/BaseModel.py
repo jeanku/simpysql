@@ -5,4 +5,4 @@ from simpysql.DBModel import DBModel
 
 class BaseModel(DBModel):
 
-    __basepath__ = '/Users/jemes/python_lib/SimpySql/'            # 项目根目录
+    __basepath__ = '/Users/admin/PycharmProjects/simpysql/'            # 项目根目录

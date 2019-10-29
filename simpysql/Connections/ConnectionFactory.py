@@ -4,6 +4,7 @@
 from ..Util.Config import config
 from .MysqlConnection import MysqlConnection
 from .MongoConnection import MongoConnection
+from .PostgresConnection import PostgresConnection
 
 
 class ConnectionFactory(object):
@@ -30,6 +31,8 @@ class ConnectionFactory(object):
         elif db_type == 'sqlserver':
             from .SqlServerConnection import SqlServerConnection
             return SqlServerConnection.instance(database, self.parse_config(database))
+        elif db_type == 'postgres':
+            return PostgresConnection.instance(database, self.parse_config(database))
         raise Exception('Unsupported driver {}'.format(database))
 
     def parse_config(self, database):
