@@ -27,7 +27,7 @@ class ModelDemo(BaseModel):
 
 if __name__ == '__main__':
     # update lh_test set name='hehe',token_name='haha4123',update_time=1559534994 where id=117
-    ModelDemo().where('id', 117).update({'name': "hehe", 'token_name': 'haha4123',  'token_name1': 'haha4123'})
+    data = ModelDemo().where('id', 1).update({'name': "hehe", 'token_name': 'haha4123',  'token_name1': 'haha4123'})
 
     data = ModelDemo().where('id', 117).decrement('status')  # 字段自增1
     data = ModelDemo().where('id', 117).decrement('status', 3)  # 字段自减3

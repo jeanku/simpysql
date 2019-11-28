@@ -2,7 +2,8 @@
 # -*- coding: UTF-8 -*-
 
 from simpysql.DBModel import DBModel
+import os
+
 
 class BaseModel(DBModel):
-
-    __basepath__ = '/Users/admin/PycharmProjects/simpysql/'            # 项目根目录
+    __basepath__ = str(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))) + '/'

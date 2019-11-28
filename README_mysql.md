@@ -269,12 +269,15 @@ data = ModelDemo().select('a.id', 'a.name').subquery('lh_test', 'a').subquery(su
 
 # Select 复合查询
 ``` python
-#如果有主键或者唯一键, 可以用replace， 当唯一键不存在时，则添加 存在时则更新
+#如果有主键或者唯一键, 可以用replace， 当唯一键不存在时，则添加 存在时则更新 
 # replace into lh_test (`id`, `name`, `token_name`) values (136, 'hehe12', 'haha12')
 data = ModelDemo().replace({'id': 136, 'name': "hehe12", 'token_name': 'haha12'})  # 字段自增3
 
-# name='hehe1234'是否存在，不存在则添加， 有则更新
+# name='hehe1234'是否存在，不存在则添加， 有则更新 仅适用单条语句 
 ModelDemo().where('name', 'hehe1234').create_or_update({'name': "hehe1234", 'token_name': "haha124"})
+
+# mysql on duplicate key update (根据唯一键 有则更新 无则添加, 弊端: 更新时id也会自增)
+ModelDemo().insert_on_duplicate([{'name': "haha4", 'token_name': "haha'124"}, {'name': "haha3", 'token_name': "haha1124"}])
 ``` 
 
 # 返回结果&属性访问

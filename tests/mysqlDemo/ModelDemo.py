@@ -116,6 +116,7 @@ if __name__ == '__main__':
 
     # 按ID 范围查询
     # data = ModelDemo().where('id', '>=', 21026).get()
+    # exit(0)
     # data = ModelDemo().where('id', '>', 21026).get()
     # data = ModelDemo().where('id', '<', 21026).get()
     # data = ModelDemo().where('id', '<=', 21026).get()

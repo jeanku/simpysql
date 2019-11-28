@@ -38,5 +38,9 @@ if __name__ == '__main__':
     #
     # # insert into lh_test (`name`, `token_name`) values ('haha1', 'haha125'),('haha1', 'haha124')
     ModelDemo().insert(['name', 'token_name'], [['haha1', 'haha125'], ['haha1', 'haha124']])
-    #
+
+
+    #插入
+    # ModelDemo().insert_on_duplicate({'id': 36, 'name': "haha10", 'token_name': "haha'128"})
+    # ModelDemo().insert_on_duplicate({'name': "haha11", 'token_name': "haha'128"})
     pass

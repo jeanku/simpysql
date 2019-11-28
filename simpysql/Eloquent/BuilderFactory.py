@@ -2,10 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from ..Util.Config import config
-from ..Eloquent.MysqlBuilder import MysqlBuilder
-from ..Eloquent.MongoBuilder import MongoBuilder
-from ..Eloquent.SqlServerBuilder import SqlServerBuilder
-from ..Eloquent.PostgresBuilder import PostgresBuilder
 
 
 class BuilderFactory(object):
@@ -27,12 +23,16 @@ class BuilderFactory(object):
 
     def create_builder(self, model, db_type, alias):
         if db_type == 'mysql':
+            from ..Eloquent.MysqlBuilder import MysqlBuilder
             return MysqlBuilder(model, alias)
         elif db_type == 'mongodb':
+            from ..Eloquent.MongoBuilder import MongoBuilder
             return MongoBuilder(model)
         elif db_type == 'sqlserver':
+            from ..Eloquent.SqlServerBuilder import SqlServerBuilder
             return SqlServerBuilder(model, alias)
         elif db_type == 'postgres':
+            from ..Eloquent.PostgresBuilder import PostgresBuilder
             return PostgresBuilder(model, alias)
         raise Exception('Unsupported driver {}'.format(db_type))
 

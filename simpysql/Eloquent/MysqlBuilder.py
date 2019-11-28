@@ -23,19 +23,19 @@ class MysqlBuilder(BaseBuilder):
         self.__model__ = model
         self.__alias__ = alias
         self.__where__ = []
-        self.__orwhere__ = []                           # orwhere处理逻辑
-        self.__whereor__ = []                           # orwhere处理逻辑
-        self.__select__ = []                            # 检索的字段
-        self.__limit__ = None                           # 检索的数据条数
-        self.__orderby__ = []                           # 排序字段
-        self.__groupby__ = []                           # 排序字段
-        self.__offset__ = None                          # offset
-        self.__lock__ = None                            # lock
-        self.__join__ = []                              # leftjoin
-        self.__union__ = []                             # union & unionall
-        self.__on__ = []                                # leftjoin
-        self.__having__ = None                          # having
-        self.__subquery__ = []                          # subquery
+        self.__orwhere__ = []  # orwhere处理逻辑
+        self.__whereor__ = []  # orwhere处理逻辑
+        self.__select__ = []  # 检索的字段
+        self.__limit__ = None  # 检索的数据条数
+        self.__orderby__ = []  # 排序字段
+        self.__groupby__ = []  # 排序字段
+        self.__offset__ = None  # offset
+        self.__lock__ = None  # lock
+        self.__join__ = []  # leftjoin
+        self.__union__ = []  # union & unionall
+        self.__on__ = []  # leftjoin
+        self.__having__ = None  # having
+        self.__subquery__ = []  # subquery
 
     def first(self):
         self.__limit__ = 1
@@ -122,6 +122,16 @@ class MysqlBuilder(BaseBuilder):
                 data = [{key: value for key, value in data.items() if key in self.__model__.columns}]
             data = self._set_create_time(data)
             self._get_connection().execute(self._compile_create(data))
+        return self
+
+    def insert_on_duplicate(self, data):
+        if isinstance(data, dict):
+            data = [data]
+        if isinstance(data, list):
+            data = self._set_create_time(data)
+            sql = self._compile_create(data) + ' on duplicate key update ' + \
+                  self._compile_duplicate_data(list(data[0].keys()))
+            self._get_connection().execute(sql)
         return self
 
     def insert(self, columns, data):
@@ -228,7 +238,7 @@ class MysqlBuilder(BaseBuilder):
     def having(self, *args):
         length = args.__len__()
         if length == 2:
-            self.__having__ = ' having {} {} {}'.format(args[0], '=',  expr.format_string(args[1]))
+            self.__having__ = ' having {} {} {}'.format(args[0], '=', expr.format_string(args[1]))
         elif length == 3:
             self.__having__ = ' having {} {} {}'.format(args[0], args[1], expr.format_string(args[2]))
         else:
@@ -299,7 +309,8 @@ class MysqlBuilder(BaseBuilder):
         if len(self.__select__) == 0:
             self.__select__.append('*')
         subsql = ''.join(
-            [self._compile_where(), self._compile_whereor(), self._compile_orwhere(), self._compile_groupby(), self._compile_orderby(),
+            [self._compile_where(), self._compile_whereor(), self._compile_orwhere(), self._compile_groupby(),
+             self._compile_orderby(),
              self._compile_having(), self._compile_limit(), self._compile_offset(), self._compile_lock()])
         joinsql = ''.join(self._compile_leftjoin())
         returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(), joinsql, subsql)
@@ -314,13 +325,15 @@ class MysqlBuilder(BaseBuilder):
         return "replace into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
 
     def _compile_insert(self, columns, data):
-        return "insert into {} {} values {}".format(self._tablename(), self._columnize(columns), ','.join([tuple(index).__str__() for index in data]))
+        return "insert into {} {} values {}".format(self._tablename(), self._columnize(columns),
+                                                    ','.join([tuple(index).__str__() for index in data]))
 
     def _compile_update(self, data):
         return "update {} set {}{}".format(self._tablename(), ','.join(self._compile_dict(data)), self._compile_where())
 
     def _compile_increment(self, data):
-        subsql = ','.join(['{}={}'.format(expr.format_column(index, self.__model__), value) for index, value in data.items()])
+        subsql = ','.join(
+            ['{}={}'.format(expr.format_column(index, self.__model__), value) for index, value in data.items()])
         return "update {} set {}{}".format(self._tablename(), subsql, self._compile_where())
 
     def _compile_delete(self):
@@ -352,7 +365,8 @@ class MysqlBuilder(BaseBuilder):
 
     def _compile_leftjoin(self):
         if self.__join__:
-            return ' ' + ' '.join(['{} {} on {}'.format(index, value._tablename(), value._compile_on()) for (index, value) in
+            return ' ' + ' '.join(
+                ['{} {} on {}'.format(index, value._tablename(), value._compile_on()) for (index, value) in
                  self.__join__])
         return ''
 
@@ -435,7 +449,8 @@ class MysqlBuilder(BaseBuilder):
         return ''
 
     def _compile_dict(self, data):
-        return ['{}={}'.format(expr.format_column(index, self.__model__), expr.format_string(value)) for index, value in data.items()]
+        return ['{}={}'.format(expr.format_column(index, self.__model__), expr.format_string(value)) for index, value in
+                data.items()]
 
     def _compile_tuple(self, data):
         if data[1] in ['in', 'not in']:
@@ -466,8 +481,9 @@ class MysqlBuilder(BaseBuilder):
     def _compile_between(self, data):
         if not (len(data) == 3 and len(data[2]) == 2):
             raise Exception('between param invalid')
-        return '{} {} {} and {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.format_string(data[2][0]),
-                                                     expr.format_string(data[2][1]))
+        return '{} {} {} and {}'.format(expr.format_column(data[0], self.__model__), data[1],
+                                        expr.format_string(data[2][0]),
+                                        expr.format_string(data[2][1]))
 
     def _compile_keyvalue(self, key, value):
         return '{}={}'.format(expr.format_column(key, self.__model__), expr.format_string(value))
@@ -480,6 +496,9 @@ class MysqlBuilder(BaseBuilder):
             else:
                 subquery.append('({}) as {}'.format(value.tosql(), index))
         return ','.join(subquery)
+
+    def _compile_duplicate_data(self, keys):
+        return ','.join(['`{}` = values(`{}`)'.format(i, i) for i in keys])
 
     def _get_connection(self):
         return self.connect(self.__model__)

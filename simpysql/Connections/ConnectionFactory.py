@@ -2,9 +2,6 @@
 # -*- coding: utf-8 -*-
 
 from ..Util.Config import config
-from .MysqlConnection import MysqlConnection
-from .MongoConnection import MongoConnection
-from .PostgresConnection import PostgresConnection
 
 
 class ConnectionFactory(object):
@@ -25,13 +22,16 @@ class ConnectionFactory(object):
 
     def create_connection(self, db_type, database: str):
         if db_type == 'mysql':
+            from .MysqlConnection import MysqlConnection
             return MysqlConnection.instance(database, self.parse_config(database))
         elif db_type == 'mongodb':
+            from .MongoConnection import MongoConnection
             return MongoConnection.instance(database, self.parse_config(database))
         elif db_type == 'sqlserver':
             from .SqlServerConnection import SqlServerConnection
             return SqlServerConnection.instance(database, self.parse_config(database))
         elif db_type == 'postgres':
+            from .PostgresConnection import PostgresConnection
             return PostgresConnection.instance(database, self.parse_config(database))
         raise Exception('Unsupported driver {}'.format(database))
 
