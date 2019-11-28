@@ -3,10 +3,11 @@
 
 
 from .Eloquent.BuilderFactory import builderfactory
+from .Util.MagicMetaClass import MagicMetaClass
 import time
 
 
-class DBModel():
+class DBModel(MagicMetaClass):
     __create_time__ = None  # 插入时间字段
 
     __update_time__ = None  # 更新时间字段

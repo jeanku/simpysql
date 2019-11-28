@@ -26,5 +26,5 @@ class ModelDemo(BaseModel):
 
 
 if __name__ == '__main__':
-    data = ModelDemo().where('id', 4).delete()
+    data = ModelDemo.where('id', 4).delete()
     exit(0)

@@ -68,7 +68,7 @@ class ModelDemo(DBModel):
 ## 操作实例
 
 ```python
-ModelDemo().where('id', 4).select('id', 'name').take(5).get()
+ModelDemo.where('id', 4).select('id', 'name').take(5).get()
 ```
 
 ## 其他

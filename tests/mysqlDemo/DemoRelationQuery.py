@@ -30,14 +30,14 @@ if __name__ == '__main__':
     ''''''
     # in/not in 子查询
     # select * from lh_test where id in (select id from lh_test where id in (56, 57))
-    # subquery = ModelDemo().select('id').where('id', 'in', [56, 57])
-    # data = ModelDemo().where('id', 'in', subquery).get()
-    # data = ModelDemo().where('id', 'not in', subquery).get()
+    subquery = ModelDemo().select('id').where('id', 'in', [56, 57])
+    data = ModelDemo().where('id', 'in', subquery).get()
+    data = ModelDemo().where('id', 'not in', subquery).get()
 
     # 子查询
     # select * from lh_test where id=(select max(id) as id from lh_test where id <= 60)
-    # subquery = ModelDemo().select('max(id) as id').where('id', '=', 60)
-    # data = ModelDemo().where('id', '=', subquery).get()
+    subquery = ModelDemo().select('max(id) as id').where('id', '=', 60)
+    data = ModelDemo().where('id', '=', subquery).get()
 
     # left join
     # select a.id,b.name from lh_test as a left join lh_test as b on a.id = b.id where a.id=42

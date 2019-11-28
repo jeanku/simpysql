@@ -35,17 +35,17 @@ if __name__ == '__main__':
         ModelDemo().where('id', 43).update({'name': "44", 'token_name': '444'})
         # raise Exception('haha')
         return data
-    data = ModelDemo().transaction(demo)
-
+    data = ModelDemo.transaction(demo)
+    print(data)
 
     # 方法2:
-    @ModelDemo.transaction
-    def demo(id):
-        data = ModelDemo().where('id', 42).first()
-        ModelDemo().where('id', id).update({'name': "444", 'token_name': '444'})
-        ModelDemo().where('id', 43).update({'name': "44", 'token_name': '444'})
-        # raise Exception('haha')
-        return data
-    data = demo(49)
-    print(data)
+    # @ModelDemo.transaction
+    # def demo(id):
+    #     data = ModelDemo.where('id', 43).first()
+    #     ModelDemo.where('id', id).update({'name': "444", 'token_name': '444'})
+    #     ModelDemo.where('id', 43).update({'name': "44", 'token_name': '444'})
+    #     # raise Exception('haha')
+    #     return data
+    # data = demo(49)
+    # print(data)
 

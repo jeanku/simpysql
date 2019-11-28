@@ -116,7 +116,8 @@ if __name__ == '__main__':
 
     # 按ID 范围查询
     # data = ModelDemo().where('id', '>=', 21026).get()
-    # exit(0)
+    # data = ModelDemo('a').where('id', '>=', 21026).first()
+
     # data = ModelDemo().where('id', '>', 21026).get()
     # data = ModelDemo().where('id', '<', 21026).get()
     # data = ModelDemo().where('id', '<=', 21026).get()
@@ -290,6 +291,6 @@ if __name__ == '__main__':
 
     # data = ModelDemo3().select('blockNumber').where('blockNumber', -1).orderby('blockNumber', 'desc').take(10).lists('blockNumber')
 
-    data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').take(5).pluck('name', 'token_name')        # 取5条 并返回list
-    print(data)
+    # data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').take(5).pluck('name', 'token_name')        # 取5条 并返回list
+    # print(data)
     pass

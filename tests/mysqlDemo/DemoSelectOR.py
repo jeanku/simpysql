@@ -27,35 +27,35 @@ class ModelDemo(BaseModel):
 
 if __name__ == '__main__':
     # select * from lh_test where id=62 or id=63
-    data = ModelDemo().where('id', 62).orwhere('id', 63).get()
-    data = ModelDemo().where('id', 62).orwhere('id', '=', 63).get()
-    data = ModelDemo().where('id', 62).orwhere({'id': 63}).get()
+    data = ModelDemo.where('id', 62).orwhere('id', 63).get()
+    data = ModelDemo.where('id', 62).orwhere('id', '=', 63).get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63}).get()
 
     # select * from lh_test where id=62 or .. or ..
-    data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', '>', 64).get()
-    data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', '>=', 64).get()
-    data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', '<', 64).get()
-    data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', '<=', 64).get()
-    data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', '!=', 64).get()
-    data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', 'in', [64, 65]).get()
-    data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', 'not in', (64, 65)).get()
-    data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', 'like', '64%').get()
-    data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', 'not like', '64%').get()
-    data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', 'between', (64, 65)).get()
-    data = ModelDemo().where('id', 62).orwhere({'id': 63}).orwhere('id', 'not between', [64, 65]).get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63}).orwhere('id', '>', 64).get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63}).orwhere('id', '>=', 64).get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63}).orwhere('id', '<', 64).get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63}).orwhere('id', '<=', 64).get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63}).orwhere('id', '!=', 64).get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63}).orwhere('id', 'in', [64, 65]).get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63}).orwhere('id', 'not in', (64, 65)).get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63}).orwhere('id', 'like', '64%').get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63}).orwhere('id', 'not like', '64%').get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63}).orwhere('id', 'between', (64, 65)).get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63}).orwhere('id', 'not between', [64, 65]).get()
 
     # select * from lh_test where id=63 or id in (select id from lh_test where id in (56, 57))
-    subquery = ModelDemo().select('id').where('id', 'in', [56, 57])
-    data = ModelDemo().where('id', 63).orwhere('id', 'in', subquery).get()
+    subquery = ModelDemo.select('id').where('id', 'in', [56, 57])
+    data = ModelDemo.where('id', 63).orwhere('id', 'in', subquery).get()
 
     # select * from lh_test where id=62 or (id > 63 and id < 78)
-    data = ModelDemo().where('id', 62).orwhere([['id', '>', 63], ('id', '<', 78)]).get()
+    data = ModelDemo.where('id', 62).orwhere([['id', '>', 63], ('id', '<', 78)]).get()
 
     # select * from lh_test where id=62 or (id=63 and name='haha')
-    data = ModelDemo().where('id', 62).orwhere({'id': 63, 'name': 'haha'}).get()
+    data = ModelDemo.where('id', 62).orwhere({'id': 63, 'name': 'haha'}).get()
 
     # select * from lh_test where id=62 and ((id=63 and name='haha') or id < 78 or (id <= 75 and id >= 56))
-    data = ModelDemo().where('id', 62).whereor([
+    data = ModelDemo.where('id', 62).whereor([
         {'id': 63, 'name': 'haha'},
         ('id', '<', 78),
         [
