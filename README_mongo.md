@@ -64,17 +64,17 @@ class ModelDemo(DBModel):
 # Create
 ``` python
 # 插入单条数据
-data = ModelDemo().create({'name': 'haha1', 'token_name': 'BTC'})
+data =ModelDemo.create({'name': 'haha1', 'token_name': 'BTC'})
 # 插入多条数据
-data = ModelDemo().create([{'name': 'haha', 'token_name': 'USDT'}, {'name': 'haha1', 'token_name': 'BTC'}])
+data =ModelDemo.create([{'name': 'haha', 'token_name': 'USDT'}, {'name': 'haha1', 'token_name': 'BTC'}])
 ```
 
 
 # Update
 ``` python
 # update
-data = ModelDemo().where('name', 'ilike', 'haHa').update({'token_name': ['BTC14', '123']})
-data = ModelDemo().where('name', 'haha').update({'token_name': 'BTC111'})
+data =ModelDemo.where('name', 'ilike', 'haHa').update({'token_name': ['BTC14', '123']})
+data =ModelDemo.where('name', 'haha').update({'token_name': 'BTC111'})
 ```
 
 # Delete
@@ -86,32 +86,32 @@ ModelDemo().where('name', 'haha1').delete()
 ## Select
 ``` python
 # select 'content', 'time', 'gateway' from table where gateway = 'MAIN_ENGINE'
-data = ModelDemo().where({'gateway': 'MAIN_ENGINE'}).select('content', 'time', 'gateway').data()
-data = ModelDemo().where('gateway', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
-data = ModelDemo().where('gateway', '=', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
+data =ModelDemo.where({'gateway': 'MAIN_ENGINE'}).select('content', 'time', 'gateway').data()
+data =ModelDemo.where('gateway', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
+data =ModelDemo.where('gateway', '=', 'MAIN_ENGINE').select('content', 'time', 'gateway').data()
 
 
-data = ModelDemo().where('gateway', '=', 'MAIN_ENGINE').get()
-data = ModelDemo().where('gateway', '<=', 'MAIN_ENGINE').get()
-data = ModelDemo().where('gateway', '<', 'MAIN_ENGINE').get()
-data = ModelDemo().where('gateway', '>', 'MAIN_ENGINE').get()
-data = ModelDemo().where('gateway', '>=', 'MAIN_ENGINE').get()
-data = ModelDemo().where('gateway', '!=', 'MAIN_ENGINE').get()
-data = ModelDemo().where('gateway', 'in', ['MAIN_ENGINE', 'BITFINEX']).get()
-data = ModelDemo().where('gateway', 'not in', ['MAIN_ENGINE', 'BITFINEX']).get()
-data = ModelDemo().where('gateway', 'like', 'MAIN_ENGINE').get()
-data = ModelDemo().where('gateway', 'not like', 'BITFINEX').get()
-data = ModelDemo().where('gateway', 'ilike', 'MAIN_eNGINE').get()       # like 不区分大小写
-data = ModelDemo().where('gateway', 'not ilike', 'bITFINEX').get()      # not like 不区分大小写
-data = ModelDemo().where('gateway', 'like', 'ENGINE$').get()            # 以'ENGINE'结尾的 like查询    
-data = ModelDemo().where('gateway', 'like', '^MAIN_').get()             # 以'MAIN_'开头的 like查询
-data = ModelDemo().where('gateway', 'like', '^MAIN_ENGINE$').get()      #gateway='MAIN_ENGINE' 
-data = ModelDemo().where('time', 'between', ['14:08:38', '14:11:37']).get()
-data = ModelDemo().where('time', 'not between', ['14:11:38', '19:38:18']).get()
-data = ModelDemo().where({'gateway': 'BITFINEX'}).where('time', '>=', '19:38:').get()       #多条件查询
+data =ModelDemo.where('gateway', '=', 'MAIN_ENGINE').get()
+data =ModelDemo.where('gateway', '<=', 'MAIN_ENGINE').get()
+data =ModelDemo.where('gateway', '<', 'MAIN_ENGINE').get()
+data =ModelDemo.where('gateway', '>', 'MAIN_ENGINE').get()
+data =ModelDemo.where('gateway', '>=', 'MAIN_ENGINE').get()
+data =ModelDemo.where('gateway', '!=', 'MAIN_ENGINE').get()
+data =ModelDemo.where('gateway', 'in', ['MAIN_ENGINE', 'BITFINEX']).get()
+data =ModelDemo.where('gateway', 'not in', ['MAIN_ENGINE', 'BITFINEX']).get()
+data =ModelDemo.where('gateway', 'like', 'MAIN_ENGINE').get()
+data =ModelDemo.where('gateway', 'not like', 'BITFINEX').get()
+data =ModelDemo.where('gateway', 'ilike', 'MAIN_eNGINE').get()       # like 不区分大小写
+data =ModelDemo.where('gateway', 'not ilike', 'bITFINEX').get()      # not like 不区分大小写
+data =ModelDemo.where('gateway', 'like', 'ENGINE$').get()            # 以'ENGINE'结尾的 like查询    
+data =ModelDemo.where('gateway', 'like', '^MAIN_').get()             # 以'MAIN_'开头的 like查询
+data =ModelDemo.where('gateway', 'like', '^MAIN_ENGINE$').get()      #gateway='MAIN_ENGINE' 
+data =ModelDemo.where('time', 'between', ['14:08:38', '14:11:37']).get()
+data =ModelDemo.where('time', 'not between', ['14:11:38', '19:38:18']).get()
+data =ModelDemo.where({'gateway': 'BITFINEX'}).where('time', '>=', '19:38:').get()       #多条件查询
 
 # skip|offset
-# data = ModelDemo().where({'gateway': 'BITFINEX'}).offset(4).get()
+# data =ModelDemo.where({'gateway': 'BITFINEX'}).offset(4).get()
 
 # sort
 data = ModelDemo2().orderby('update_time').get()           # update_time 正序
@@ -131,26 +131,26 @@ data = ModelDemo2().where('update_time', '>=', 1559722499).whereor({'name': 'hah
 # Response
 ``` python
 # 返回单条数据 dict: {'id': 50}
-data = ModelDemo().where('id', '>=', 50).select('id').first()
+data =ModelDemo.where('id', '>=', 50).select('id').first()
 print(data)          # {'id': 50}
 print(data.id)       # 50
 print(data['id'])    # 50
 
 # 返回数据 list: [{'id': 50}]
-data = ModelDemo().where('id', '>=', 50).select('id').take(1).get()
+data =ModelDemo.where('id', '>=', 50).select('id').take(1).get()
 print(data)                                 # [{'id': 50}]
 print([index.id for index in data])         # [50]
 print([index['id'] for index in data])      # [50]
 
 # 返回数据 list: [50, 55, 56, 57, 58]
-data = ModelDemo().where('id', '>=', 50).take(5).lists('id')
+data =ModelDemo.where('id', '>=', 50).take(5).lists('id')
 
 # 返回数据 list: [[50, 'haha'], [55, 'haha'], [56, 'haha'], [57, 'haha'], [58, 'haha']]
-data = ModelDemo().where('id', '>=', 50).take(5).lists(['id', 'name'])
+data =ModelDemo.where('id', '>=', 50).take(5).lists(['id', 'name'])
 
 # 返回数据 key-value: {'14:08:38': 'MAIN_ENGINE', '14:11:37': 'MAIN_ENGINE', ...}
 data = ModelDemo1().select('content', 'time', 'gateway').take(10).pluck('time', 'gateway')
 
 # 返回pandas dataFrame / None
-data = ModelDemo().where('id', '>=', 1150).take(5).data()
+data =ModelDemo.where('id', '>=', 1150).take(5).data()
 ```
