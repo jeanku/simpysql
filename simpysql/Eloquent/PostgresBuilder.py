@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import collections
-import psycopg2.extras
 from simpysql.Util.Expression import expression as expr, Expression
 from simpysql.Util.Response import Response
 from .BaseBuilder import BaseBuilder

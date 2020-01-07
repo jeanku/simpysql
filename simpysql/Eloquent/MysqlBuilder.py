@@ -233,7 +233,7 @@ class MysqlBuilder(BaseBuilder):
         return self
 
     def execute(self, sql):
-        return self._get_connection().execute(sql)
+        return Response(self._get_connection().execute(sql, DictCursor))
 
     def having(self, *args):
         length = args.__len__()

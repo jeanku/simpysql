@@ -168,7 +168,9 @@ if __name__ == '__main__':
     # data = ModelDemo().select('distinct(id) as id').lists('id')
 
     # 原生sql
-    # data = ModelDemo().execute('select count(*) as num,`name` from lh_test group by `name`')
+    # data = ModelDemo().execute('select count(*) as num,`name` from lh_test group by `name`').get()
+    # data = ModelDemo().execute('select count(*) as num,`name` from lh_test group by `name`').pluck('name', 'num')
+    # data = ModelDemo().execute('select count(*) as num,`name` from lh_test group by `name`').lists('name')
     # data = ModelDemo().get()
 
     # 事务
@@ -291,6 +293,7 @@ if __name__ == '__main__':
 
     # data = ModelDemo3().select('blockNumber').where('blockNumber', -1).orderby('blockNumber', 'desc').take(10).lists('blockNumber')
 
-    # data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').take(5).pluck('name', 'token_name')        # 取5条 并返回list
+    # data = ModelDemo().where('id', '>', 0).orderby('id', 'desc').take(5).select('id', 'name').get()        # 取5条 并返回list
+    # data = ModelDemo.where('id', '>', 0).select('id').where('id', '>', 56).orderby('field(id, 58, 60, 61, 57, 59)').take(5).get()        # 取5条 并返回list
     # print(data)
     pass

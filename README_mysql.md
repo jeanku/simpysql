@@ -169,7 +169,10 @@ data = ModelDemo('a').where('id', '>', 63).sum('id')
 data = ModelDemo('a').where('id', '>', 63).exist()
     
 # 原生sql
-data = ModelDemo.execute('select count(*) as num,`name` from lh_test group by name')
+data = ModelDemo.execute('select count(*) as num,`name` from lh_test group by name').get()
+data = ModelDemo.execute('select count(*) as num,`name` from lh_test group by name').pluck('name', 'num')
+data = ModelDemo.execute('select count(*) as num,`name` from lh_test group by name').lists(['name', 'num'])
+data = ModelDemo.execute('select count(*) as num,`name` from lh_test group by name').lists('name')
 
 # 表名设置别名
 # select a.name,a.token_name from lh_test as a where id=62

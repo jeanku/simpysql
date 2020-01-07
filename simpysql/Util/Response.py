@@ -33,3 +33,9 @@ class Response(object):
 
     def format_decimal(self, val):
         return str(val) if isinstance(val, decimal.Decimal) else val
+
+    def get(self):
+        return self.__data__
+
+    def lists(self, columns):
+        return self.tolist(columns)
