@@ -27,20 +27,17 @@ class ModelDemo(BaseModel):
 
 if __name__ == '__main__':
     # 插入
-    ModelDemo.create({'name': "haha1", 'token_name': "haha'124"})
-
+    id = ModelDemo.create({'name': "haha1", 'token_name': "haha'124", "create_time": 1413510, "update_time": 1413510})
     # 添加数据 并获取插入的自增ID
     lastid = ModelDemo.create({'name': "haha1", 'token_name': "haha'125"}).lastid()
     # print(lastid)
-    #
-    # # 批量插入
+    # #
+    # # # 批量插入
     ModelDemo.create([{'name': "haha1", 'token_name': 'haha124'}, {'name': "haha2", 'token_name': 'haha125'}])
-    #
-    # # insert into lh_test (`name`, `token_name`) values ('haha1', 'haha125'),('haha1', 'haha124')
+    # insert into lh_test (`name`, `token_name`) values ('haha1', 'haha125'),('haha1', 'haha124')
     ModelDemo.insert(['name', 'token_name'], [['haha1', 'haha125'], ['haha1', 'haha124']])
 
-
     #插入
-    # ModelDemo.insert_on_duplicate({'id': 36, 'name': "haha10", 'token_name': "haha'128"})
-    # ModelDemo.insert_on_duplicate({'name': "haha11", 'token_name': "haha'128"})
+    ModelDemo.insert_on_duplicate({'id': 36, 'name': "haha10", 'token_name': "haha'128"})
+    ModelDemo.insert_on_duplicate({'name': "haha11", 'token_name': "haha'128"})
     pass

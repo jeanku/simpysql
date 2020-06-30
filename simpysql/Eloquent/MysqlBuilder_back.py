@@ -129,7 +129,9 @@ class MysqlBuilder(BaseBuilder):
             data = [data]
         if isinstance(data, list):
             data = self._set_create_time(data)
-            self._get_connection().execute(self._compile_insert_on_duplicate(data))
+            sql = self._compile_create(data) + ' on duplicate key update ' + \
+                  self._compile_duplicate_data(list(data[0].keys()))
+            self._get_connection().execute(sql)
         return self
 
     def insert(self, columns, data):
@@ -231,7 +233,7 @@ class MysqlBuilder(BaseBuilder):
         return self
 
     def execute(self, sql):
-        return Response(self._get_connection().execute((sql, None), DictCursor))
+        return Response(self._get_connection().execute(sql, DictCursor))
 
     def having(self, *args):
         length = args.__len__()
@@ -314,24 +316,17 @@ class MysqlBuilder(BaseBuilder):
         returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(), joinsql, subsql)
         if self.__union__:
             return '{}'.format(returnsql) + self._compile_union()
-        return returnsql, None
+        return returnsql
 
     def _compile_create(self, data):
-        key, fill = self._columnize(data[0])
-        return "insert into {} {} values {}".format(self._tablename(), key, fill), self._valueize(data)
+        return "insert into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
 
     def _compile_replace(self, data):
-        key, fill = self._columnize(data[0])
-        return "replace into {} {} values {}".format(self._tablename(), key, fill), self._valueize(data)
+        return "replace into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
 
     def _compile_insert(self, columns, data):
-        key, fill = self._columnize(columns)
-        return "insert into {} {} values {}".format(self._tablename(), key, fill), tuple([tuple(i) for i in data])
-
-    def _compile_insert_on_duplicate(self, data):
-        key, fill = self._columnize(data[0])
-        return "insert into {} {} values {} on duplicate key update {}".format(self._tablename(), key, fill,
-            self._compile_duplicate_data(list(data[0].keys()))), self._valueize(data)
+        return "insert into {} {} values {}".format(self._tablename(), self._columnize(columns),
+                                                    ','.join([tuple(index).__str__() for index in data]))
 
     def _compile_update(self, data):
         return "update {} set {}{}".format(self._tablename(), ','.join(self._compile_dict(data)), self._compile_where())
@@ -345,17 +340,13 @@ class MysqlBuilder(BaseBuilder):
         return 'delete from {}{}'.format(self._tablename(), self._compile_where())
 
     def _compile_lastid(self):
-        return 'select last_insert_id() as lastid', None
+        return 'select last_insert_id() as lastid'
 
     def _columnize(self, columns):
-        temp = tuple(columns)
-        temp1 = tuple(['%s'] * temp.__len__())
-        return temp.__str__().replace('\'', '`'),  temp1.__str__().replace('\'', '')
+        return tuple(columns).__str__().replace('\'', '`')
 
     def _valueize(self, data):
-        if data.__len__() == 1:
-            return tuple(tuple(data[0].values()))
-        return tuple([tuple(index.values()) for index in data])
+        return ','.join([tuple(index.values()).__str__() for index in data])
 
     def _compile_groupby(self):
         return '' if len(self.__groupby__) == 0 else ' group by ' + ','.join(self.__groupby__)
@@ -541,17 +532,17 @@ class MysqlBuilder(BaseBuilder):
         update_column = self.__model__.update_time_column()
         create_column = self.__model__.create_time_column()
         for index in data:
-            if create_column:
-                index[create_column] = index.get(create_column, currtime)
-            if update_column:
-                index[update_column] = index.get(update_column, currtime)
+            if create_column and create_column not in index:
+                index[create_column] = currtime
+            if update_column and update_column not in index:
+                index[update_column] = currtime
         return data
 
     def _set_update_time(self, data):
         currtime = self.__model__.fresh_timestamp()
         update_column = self.__model__.update_time_column()
-        if update_column:
-            data[update_column] = data.get(update_column, currtime)
+        if update_column and update_column not in data:
+            data[update_column] = currtime
         return data
 
     def transaction(self, callback):

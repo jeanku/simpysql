@@ -1,6 +1,5 @@
 .DS_Store
 .idea/
-.env
 build/
 dist/
 simpysql.egg-info/

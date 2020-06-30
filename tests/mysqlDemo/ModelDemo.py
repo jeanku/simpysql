@@ -111,7 +111,9 @@ if __name__ == '__main__':
     # 删除
     # data = ModelDemo().where('id', 4).delete()
     # 查询[精确查询]
-    # data = ModelDemo().where('id', '>', 1).first()
+    data = ModelDemo().where('id', '>', 1).first()
+    print(data)
+    exit(0)
     # data = ModelDemo().where('id', '=', 21026).first()
 
     # 按ID 范围查询
