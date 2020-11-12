@@ -10,7 +10,7 @@ pip install simpysql
 
 ``` python
 [default]                                       #数据库配置名称(对应model.__database__)
-DB_TYPE=mysql                                   #数据库类型 mysql 或者 mongo
+DB_TYPE=mysql                                   #数据库类型 mysql 或者 mongodb
 DB_HOST=127.0.0.1                               #数据库IP                          
 DB_PORT=3306                                    #端口
 DB_NAME=test_db1                                #库名
