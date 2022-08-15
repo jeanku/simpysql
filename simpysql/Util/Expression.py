@@ -18,7 +18,7 @@ class Expression(object):
         if isinstance(key, Expression):
             return key.__name
         elif isinstance(key, str):
-            return "'{}'".format(pymysql.escape_string(key))
+            return "'{}'".format(pymysql.converters.escape_string(key))
         elif isinstance(key, BaseBuilder):
             return "({})".format(key.tosql())
         return key
