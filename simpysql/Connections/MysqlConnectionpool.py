@@ -1,4 +1,4 @@
-from DBUtils.PooledDB import PooledDB, SharedDBConnection
+from dbutils.pooled_db import PooledDB
 import pymysql
 
 
