@@ -100,7 +100,7 @@ data = ModelDemo.where('id', 117).get()
 data = ModelDemo.where({'id': 117}).get()
 data = ModelDemo.where('id', '=', 117).get()
 
- # >=, >, <.<=, !=, like, not in, in, not between, between, like, not like
+ # >=, >, <.<=, !=, like, not in, in, not between, between, like, not like, is
 data = ModelDemo.where('id', '>=', 21026).get()
 data = ModelDemo.where('id', '>', 21026).get()
 data = ModelDemo.where('id', '<', 21026).get()
@@ -112,6 +112,8 @@ data = ModelDemo.where('id', 'between', [21026, 21027]).get()
 data = ModelDemo.where('id', 'not between', [21026, 21027]).get()
 data = ModelDemo.where('name', 'like', 'Tether%').get()
 data = ModelDemo.where('name', 'not like', 'Tether%').get()
+data = ModelDemo.where('name', 'is', 'null').get()
+data = ModelDemo.where('name', 'is not', 'NULL').get()
 
 # 多条件查询
 # select * from lh_test where `id`=1 and `name`='hehe' and `token_name`='hehe123' and `id` > 0
