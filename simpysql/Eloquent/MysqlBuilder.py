@@ -12,11 +12,11 @@ from simpysql.Util.Dynamic import Dynamic
 class MysqlBuilder(BaseBuilder):
     operators = [
         '=', '<', '>', '<=', '>=', '<>', '!=',
-        'like', 'like binary', 'not like', 'between', 'ilike',
+        'is', 'like', 'like binary', 'not like', 'between', 'ilike',
         '&', '|', '^', '<<', '>>',
         'rlike', 'regexp', 'not regexp',
         '~', '~*', '!~', '!~*', 'similar to',
-        'not similar to', 'not ilike', '~~*', '!~~*', 'in', 'not in', 'not between'
+        'not similar to', 'not ilike', '~~*', '!~~*', 'in', 'not in', 'not between', 'is not'
     ]
 
     def __init__(self, model, alias=None):
