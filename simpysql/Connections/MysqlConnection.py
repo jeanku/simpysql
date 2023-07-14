@@ -21,10 +21,7 @@ class MysqlConnection(Connection):
     def execute(self, sql, cursorclass=None):
         self.log(sql)
         cursor = self.connect().cursor(cursor=cursorclass)
-        if sql[1] and isinstance(sql[1][0], tuple):
-            cursor.executemany(sql[0], sql[1])
-        else:
-            cursor.execute(sql[0], sql[1])
+        cursor.execute(sql)
         data = cursor.fetchall()
         if not hasattr(self, '_transaction'):
             self.connect().commit()
