@@ -6,11 +6,11 @@
 __author__ = ''
 
 from tests.mysqlDemo.BaseModel import BaseModel
-
+import datetime
 
 class ModelDemo(BaseModel):
 
-    __tablename__ = 'lh_test'  # 表名
+    __tablename__ = 'zh_test'  # 表名
 
     __create_time__ = 'create_time'  # 插入时间字段 如果该字段为None create_time则不会自动添加
 
@@ -24,6 +24,9 @@ class ModelDemo(BaseModel):
         'create_time',
         'update_time',
     ]
+
+    def fresh_timestamp(self):
+        return datetime.datetime.now().strftime("%Y-%m-%d %H:%m:%S")
 
 
 class ModelDemo1(BaseModel):
@@ -106,13 +109,13 @@ if __name__ == '__main__':
     # exit(0)
     # data = ModelDemo().where('id', 1).decrement('status', 3)                     #字段自增1
     # data = ModelDemo().where('id', 1).increment('status', 3)                  #字段自增3
-    # data = ModelDemo().where('id', 1).decrement('status', 3)                  #字段自减3
+    data = ModelDemo().where('id', 1).decrement('status', 2)                  #字段自减3
 
     # 删除
     # data = ModelDemo().where('id', 4).delete()
     # 查询[精确查询]
-    data = ModelDemo().where('id', '>', 1).first()
-    print(data)
+    # data = ModelDemo().where('id', '>', 1).first()
+    # print(data)
     exit(0)
     # data = ModelDemo().where('id', '=', 21026).first()
 
