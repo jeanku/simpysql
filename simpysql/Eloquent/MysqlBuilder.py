@@ -106,14 +106,14 @@ class MysqlBuilder(BaseBuilder):
         if isinstance(amount, int) and amount > 0:
             data = collections.defaultdict(dict)
             data[key] = '{}+{}'.format(expr.format_column(key, self.__model__), str(amount))
-            data = self._set_update_time(data)
+            data = self._set_crease_update_time(data)
             return self._get_connection().execute(self._compile_increment(data))
 
     def decrement(self, key, amount=1):
         if isinstance(amount, int) and amount > 0:
             data = collections.defaultdict(dict)
             data[key] = '{}-{}'.format(expr.format_column(key, self.__model__), str(amount))
-            data = self._set_update_time(data)
+            data = self._set_crease_update_time(data)
             return self._get_connection().execute(self._compile_increment(data))
 
     def create(self, data):
@@ -543,6 +543,13 @@ class MysqlBuilder(BaseBuilder):
         update_column = self.__model__.update_time_column()
         if update_column and update_column not in data:
             data[update_column] = currtime
+        return data
+
+    def _set_crease_update_time(self, data):
+        currtime = self.__model__.fresh_timestamp()
+        update_column = self.__model__.update_time_column()
+        if update_column and update_column not in data:
+            data[update_column] = "'{}'".format(currtime)
         return data
 
     def transaction(self, callback):
