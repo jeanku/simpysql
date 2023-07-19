@@ -332,7 +332,8 @@ class MysqlBuilder(BaseBuilder):
         return "update {} set {}{}".format(self._tablename(), ','.join(self._compile_dict(data)), self._compile_where())
 
     def _compile_increment(self, data):
-        subsql = ','.join(self._compile_dict(data))
+        subsql = ','.join(
+            ['{}={}'.format(expr.format_column(index, self.__model__), value) for index, value in data.items()])
         return "update {} set {}{}".format(self._tablename(), subsql, self._compile_where())
 
     def _compile_delete(self):
