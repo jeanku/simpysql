@@ -10,7 +10,7 @@ import datetime
 
 class ModelDemo(BaseModel):
 
-    __tablename__ = 'zh_test'  # 表名
+    __tablename__ = 'lh_test'  # 表名
 
     __create_time__ = 'create_time'  # 插入时间字段 如果该字段为None create_time则不会自动添加
 
@@ -25,8 +25,8 @@ class ModelDemo(BaseModel):
         'update_time',
     ]
 
-    def fresh_timestamp(self):
-        return datetime.datetime.now().strftime("%Y-%m-%d %H:%m:%S")
+    # def fresh_timestamp(self):
+    #     return datetime.datetime.now().strftime("%Y-%m-%d %H:%m:%S")
 
 
 class ModelDemo1(BaseModel):
@@ -102,14 +102,14 @@ if __name__ == '__main__':
     # ModelDemo().create([{'name': "haha1", 'token_name': 'haha124'}, {'name':"haha2", 'token_name': 'haha125'}])
 
     # 更新
-    # data = {'name':"hehe", 'token_name': 'haha"\"\'124'}
+    data = {'name':"hehe", 'token_name': 'haha"\"\'124'}
     # print(data.__str__())
     # ModelDemo().where('id', 42).update(data)
     # print("123")
     # exit(0)
     # data = ModelDemo().where('id', 1).decrement('status', 3)                     #字段自增1
-    # data = ModelDemo().where('id', 1).increment('status', 3)                  #字段自增3
-    data = ModelDemo().where('id', 1).decrement('status', 2)                  #字段自减3
+    data = ModelDemo().where('id', 1).increment('status', 3)                  #字段自增3
+    # data = ModelDemo().where('id', 1).decrement('status', 2)                  #字段自减3
 
     # 删除
     # data = ModelDemo().where('id', 4).delete()
