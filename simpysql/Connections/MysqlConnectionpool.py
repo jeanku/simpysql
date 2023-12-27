@@ -24,7 +24,7 @@ class Connectionpool():
                 blocking=True,  # 连接池中如果没有可用连接后，是否阻塞等待。True，等待；False，不等待然后报错
                 maxusage=None,  # 一个链接最多被重复使用的次数，None表示无限制
                 setsession=[],  # 开始会话前执行的命令列表。如：["set datestyle to ...", "set time zone ..."]
-                ping=0,
+                ping=1,
                 **pro_db_config
             )
 
