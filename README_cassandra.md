@@ -2,7 +2,7 @@
 
 # 安装
 ```
-pip install simpysql
+pip install simpysqls
 
 # 安装cassandra依赖
 pip install cassandra-driver

@@ -2,7 +2,7 @@
 
 # 安装
 ```
-pip install simpysql
+pip install simpysqls
 ```
 
 # 初始化
