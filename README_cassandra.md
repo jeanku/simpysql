@@ -49,13 +49,9 @@ from simpysql.DBModel import DBModel
 
 class ModelDemo(BaseModel):
 
-    __database__ = "community"
+    __database__ = "kasplex"
 
     __tablename__ = 'tx'  # 表名
-
-    # __create_time__ =   # 插入时间字段 如果该字段为None create_time则不会自动添加
-
-    # __update_time__ = 'update_time'  # 更新时间字段 如果该字段为None create_time则不会自动添加
 
     columns = [  # 数据库字段
         'from_addr',
