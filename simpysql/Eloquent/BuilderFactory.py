@@ -34,6 +34,9 @@ class BuilderFactory(object):
         elif db_type == 'postgres':
             from ..Eloquent.PostgresBuilder import PostgresBuilder
             return PostgresBuilder(model, alias)
+        elif db_type == 'cassandra':
+            from ..Eloquent.CassandraBuilder import CassandraBuilder
+            return CassandraBuilder(model, alias)
         raise Exception('Unsupported driver {}'.format(db_type))
 
 

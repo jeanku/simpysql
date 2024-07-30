@@ -4,6 +4,7 @@
 
 [mysql文档](./README_mysql.md)
 , [mongo文档](./README_mongo.md)
+, [cassandra文档](./README_cassandra.md)
 
 # 安装
 ```
