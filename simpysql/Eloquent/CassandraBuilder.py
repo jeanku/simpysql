@@ -35,19 +35,24 @@ class CassandraBuilder(BaseBuilder):
         self.__on__ = []  # leftjoin
         self.__having__ = None  # having
         self.__subquery__ = []  # subquery
+        self.__allow_filtering__ = False  # subquery
 
     def first(self):
         self.__limit__ = 1
         data = self.get()
         if data:
             return data.pop()
-        return data
+        return dict()
 
     def get(self):
         return list(self._get_connection().execute(self._compile_select()))
 
-    def lists(self, columns):
-        return [getattr(i, "hash_code", None) for i in self._get_connection().execute(self._compile_select())]
+    async def async_get(self):
+        data = await self._get_connection().execute_async(self._compile_select())
+        return list(data)
+
+    def lists(self, column):
+        return [i.get(column, None) for i in self._get_connection().execute(self._compile_select())]
 
     def pluck(self, key, value):
         data = self._get_connection().execute(self._compile_select())
@@ -57,34 +62,34 @@ class CassandraBuilder(BaseBuilder):
         if isinstance(column, str) and column in self.__model__.columns:
             self.__select__ = ['max({}) as aggregate'.format(column)]
             data = self.first()
-            return data.aggregate if data else None
+            return data['aggregate']
         raise Exception('param invalid in function max')
 
     def min(self, column):
         if isinstance(column, str) and column in self.__model__.columns:
             self.__select__ = ['min({}) as aggregate'.format(column)]
             data = self.first()
-            return data.aggregate if data else None
+            return data['aggregate']
         raise Exception('param invalid in function min')
 
     def avg(self, column):
         if isinstance(column, str) and column in self.__model__.columns:
             self.__select__ = ['avg({}) as aggregate'.format(column)]
             data = self.first()
-            return data.aggregate if data else None
+            return data['aggregate']
         raise Exception('param invalid in function avg')
 
     def sum(self, column):
         if isinstance(column, str) and column in self.__model__.columns:
             self.__select__ = ['sum({}) as aggregate'.format(column)]
             data = self.first()
-            return data.aggregate if data else None
+            return data['aggregate']
         raise Exception('param invalid in function sum')
 
     def count(self):
         self.__select__ = ['count(*) as aggregate']
         data = self.first()
-        return data.aggregate if data else None
+        return data['aggregate']
 
     def exist(self):
         self.__limit__ = 1
@@ -123,6 +128,10 @@ class CassandraBuilder(BaseBuilder):
 
     def select(self, *args):
         self.__select__ = self._format_columns(list(args))
+        return self
+
+    def allow_filtering(self):
+        self.__allow_filtering__ = True
         return self
 
     def groupby(self, *args):
@@ -242,7 +251,7 @@ class CassandraBuilder(BaseBuilder):
         subsql = ''.join(
             [self._compile_where(), self._compile_whereor(), self._compile_orwhere(), self._compile_groupby(),
              self._compile_orderby(),
-             self._compile_having(), self._compile_limit(), self._compile_offset(), self._compile_lock()])
+             self._compile_having(), self._compile_limit(), self._compile_offset(), self._compile_lock(), self._compile_allow_filtering()])
         joinsql = ''.join(self._compile_leftjoin())
         returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(), joinsql, subsql)
         if self.__union__:
@@ -264,7 +273,7 @@ class CassandraBuilder(BaseBuilder):
 
     def _compile_increment(self, data):
         subsql = ','.join(
-            ['{}={}'.format(expr.format_column(index, self.__model__), value) for index, value in data.items()])
+            ['{}={}'.format(expr.format_column_for_cassandra(index, self.__model__), value) for index, value in data.items()])
         return "update {} set {}{}".format(self._tablename(), subsql, self._compile_where())
 
     def _compile_delete(self):
@@ -290,6 +299,9 @@ class CassandraBuilder(BaseBuilder):
 
     def _compile_offset(self):
         return '' if self.__offset__ is None else ' offset {}'.format(self.__offset__)
+
+    def _compile_allow_filtering(self):
+        return ' allow filtering' if self.__allow_filtering__ else ''
 
     def _compile_lock(self):
         return '' if self.__lock__ is None else self.__lock__
@@ -388,10 +400,10 @@ class CassandraBuilder(BaseBuilder):
             return self._compile_in((data[0], data[1], data[2]))
         elif data[1] in ['between', 'not between']:
             return self._compile_between((data[0], data[1], data[2]))
-        return '{} {} {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.format_string(data[2]))
+        return '{} {} {}'.format(expr.format_column_for_cassandra(data[0], self.__model__), data[1], expr.format_string(data[2]))
 
     def _compile_in(self, data):
-        return '{} {} {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.list_to_str(data[2]))
+        return '{} {} {}'.format(expr.format_column_for_cassandra(data[0], self.__model__), data[1], expr.list_to_str(data[2]))
 
     def _compile_list(self, data):
         length = len(data)
@@ -412,12 +424,12 @@ class CassandraBuilder(BaseBuilder):
     def _compile_between(self, data):
         if not (len(data) == 3 and len(data[2]) == 2):
             raise Exception('between param invalid')
-        return '{} {} {} and {}'.format(expr.format_column(data[0], self.__model__), data[1],
+        return '{} {} {} and {}'.format(expr.format_column_for_cassandra(data[0], self.__model__), data[1],
                                         expr.format_string(data[2][0]),
                                         expr.format_string(data[2][1]))
 
     def _compile_keyvalue(self, key, value):
-        return '{}={}'.format(expr.format_column(key, self.__model__), expr.format_string(value))
+        return '{}={}'.format(expr.format_column_for_cassandra(key, self.__model__), expr.format_string(value))
 
     def _compile_subquery(self):
         subquery = []
@@ -456,7 +468,7 @@ class CassandraBuilder(BaseBuilder):
         return self.__model__.__tablename__ + ' as {}'.format(self.__alias__)
 
     def _format_columns(self, columns):
-        return ['"{}"'.format(index) for index in columns]
+        return list(map(lambda index: expr.format_column_for_cassandra(index, self.__model__), columns))
 
     def _set_create_time(self, data):
         currtime = self.__model__.fresh_timestamp()

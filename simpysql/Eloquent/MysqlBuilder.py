@@ -120,6 +120,8 @@ class MysqlBuilder(BaseBuilder):
         if data:
             if data and isinstance(data, dict):
                 data = [{key: value for key, value in data.items() if key in self.__model__.columns}]
+            if isinstance(data, list):
+                data = [{k: v for k, v in value.items() if k in self.__model__.columns} for value in data]
             data = self._set_create_time(data)
             self._get_connection().execute(self._compile_create(data))
         return self
@@ -136,6 +138,16 @@ class MysqlBuilder(BaseBuilder):
 
     def insert(self, columns, data):
         self._get_connection().execute(self._compile_insert(columns, data))
+        return self
+
+    def insert_ignore(self, data):
+        if data:
+            if data and isinstance(data, dict):
+                data = [{key: value for key, value in data.items() if key in self.__model__.columns}]
+            if isinstance(data, list):
+                data = [{k: v for k, v in value.items() if k in self.__model__.columns} for value in data]
+            data = self._set_create_time(data)
+            self._get_connection().execute(self._compile_insert_ignore(data))
         return self
 
     def replace(self, data):
@@ -327,6 +339,9 @@ class MysqlBuilder(BaseBuilder):
     def _compile_insert(self, columns, data):
         return "insert into {} {} values {}".format(self._tablename(), self._columnize(columns),
                                                     ','.join([tuple(index).__str__() for index in data]))
+
+    def _compile_insert_ignore(self, data):
+        return "insert ignore into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
 
     def _compile_update(self, data):
         return "update {} set {}{}".format(self._tablename(), ','.join(self._compile_dict(data)), self._compile_where())

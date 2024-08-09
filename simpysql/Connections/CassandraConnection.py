@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+from cassandra.auth import PlainTextAuthProvider
+from cassandra.policies import RoundRobinPolicy
+from cassandra.cluster import NoHostAvailable
+from cassandra.cluster import Cluster
+from cassandra.connection import ssl
 from .Connection import Connection
 from ..Util.Logger import logger
-from cassandra.cluster import Cluster
-from cassandra.auth import PlainTextAuthProvider
-from cassandra.cluster import NoHostAvailable
-from cassandra.policies import RoundRobinPolicy
-from cassandra.connection import ssl
 import threading
 
 
@@ -25,7 +25,8 @@ class CassandraConnection(Connection):
 
     def execute(self, sql):
         self.log(sql)
-        return self.connect().execute(sql)
+        rows = self.connect().execute(sql)
+        return [dict(row._asdict()) for row in rows]
 
     def connect(self):
         if self._connection.get(self._database) is None:
@@ -58,7 +59,7 @@ class CassandraConnection(Connection):
                         self._connection[self._database] = session
                     except NoHostAvailable as e:
                         if self._logger:
-                            self._logger.error(f"Could not connect to Cassandra: {e}")
+                            self._logger.info(f"Could not connect to Cassandra: {e}")
                         raise
         return self._connection[self._database]
 

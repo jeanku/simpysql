@@ -8,7 +8,7 @@ __author__ = ''
 import time
 
 from tests.mysqlDemo.BaseModel import BaseModel
-
+import asyncio
 
 class ModelDemo(BaseModel):
 
@@ -45,7 +45,7 @@ class ModelDemo1(BaseModel):
 
 
 if __name__ == '__main__':
-    pass
+
     # 添加单个数据
     # sql: insert into tx ("from_addr", "to_addr", "hash_code", "amount", "height") values ('qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9d3', 'cy3dfs9dc3w7lm9rq0zs76vf959mmrp3', 'hashcode22', 104, 86400)
     # ModelDemo.create({
@@ -100,9 +100,9 @@ if __name__ == '__main__':
 
     # 查询 select * from tx where "from_addr"='qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9d2' and "hash_code"='hashcode' limit 1
     # data = ModelDemo.where({
-    #     "from_addr": "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9d2",
+    #     "from_addr": "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9d221",
     #     "hash_code": "hashcode"
-    # }).first()
+    # }).get()
 
     # sql: select * from tx where "from_addr"='qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9d2'
     # data = ModelDemo.where({
@@ -126,7 +126,8 @@ if __name__ == '__main__':
     # select * from tx where "from_addr"='qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp' limit 5
     # data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").take(5).lists("hash_code")
 
-    data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").take(2).pluck("hash_code", "amount")
+    # data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").take(2).pluck("hash_code", "amount")
+    # data = ModelDemo.where('from_addr', '>', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").allow_filtering().pluck("hash_code", "amount")
     # data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").count()
     # data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").count()
 
@@ -136,9 +137,30 @@ if __name__ == '__main__':
     # data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").where("hash_code", "420223c3d63356b2073ce588dd9d3159").get()
     # data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").where("hash_code", "420223c3d63356b2073ce588dd9d3159").get()
     # data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").where("hash_code", "420223c3d63356b2073ce588dd9d3159").get()
-    # data = ModelDemo.where('id', 62).orwhere('id', '=', 63).get()
-    # data = ModelDemo.where('id', 62).orwhere({'id': 63}).get()
+
     # print("1", data)
-    # data = ModelDemo1.where('prefix2', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").take(1).get()
-    print("2", data)
+    for i in range(10000):
+        data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").select("from_addr as name").first()
+
     exit(0)
+    # async def async_run(p):
+    #     data = await ModelDemo.where('from_addr', p).async_get()
+    #     print(data)
+
+    # p = ['qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp', 'qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp', 'qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp', 'qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp']
+
+    # # async def main():
+    # #     p = [
+    # #         'qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp',
+    # #         'qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp',
+    # #         'qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp',
+    # #         'qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp'
+    # #     ]
+    # #
+    # #     tasks = [async_run(i) for i in p]
+    # #     await asyncio.gather(*tasks)
+    #
+    #
+    # asyncio.run(main())
+    # # print("2", data)
+    # exit(0)
