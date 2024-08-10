@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: simpysqls
-Version: 0.5.6
+Version: 0.5.7
 Summary: A simple mysql orm base on pymysql
 Home-page: 
 Author: jeanku, liubin

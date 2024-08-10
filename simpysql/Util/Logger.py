@@ -12,7 +12,7 @@ import datetime
 class Logger(object):
     _instance = None
 
-    _logger = None
+    _logger = {}
 
     def __new__(cls, *args, **kw):
         if not cls._instance:
@@ -27,17 +27,20 @@ class Logger(object):
         return self
 
     def get_logger(self):
-        if self._logger is None:
-            self._logger = logging.getLogger("logging")
-            self._logger.setLevel("INFO")
+        date = datetime.datetime.now().strftime("%Y%m%d")
+        if self._logger.get(date) is None:
+            self._logger = {}
+            logger = logging.getLogger(date)
+            logger.setLevel("INFO")
             formatter = logging.Formatter('%(asctime)s 【%(levelname)s】%(message)s')
             fh = logging.FileHandler(self._path + "{}.log".format(datetime.datetime.now().strftime("%Y%m%d")))
             ch = logging.StreamHandler()
             fh.setFormatter(formatter)
             ch.setFormatter(formatter)
-            self._logger.addHandler(fh)
-            self._logger.addHandler(ch)
-        return self._logger
+            logger.addHandler(fh)
+            logger.addHandler(ch)
+            self._logger[date] = logger
+        return self._logger.get(date)
 
 
 logger = Logger()

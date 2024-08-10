@@ -139,9 +139,10 @@ if __name__ == '__main__':
     # data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").where("hash_code", "420223c3d63356b2073ce588dd9d3159").get()
 
     # print("1", data)
-    for i in range(10000):
-        data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").select("from_addr as name").first()
-
+    data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").select("from_addr as name").first()
+    # for i in range(10000):
+    #     data = ModelDemo.where('from_addr', "qpamkvhgh0kzx50gwvvp5xs8ktmqutcy3dfs9dc3w7lm9rq0zs76vf959mmrp").select("from_addr as name").first()
+    #     time.sleep(1)
     exit(0)
     # async def async_run(p):
     #     data = await ModelDemo.where('from_addr', p).async_get()
