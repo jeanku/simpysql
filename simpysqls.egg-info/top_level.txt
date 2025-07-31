@@ -1,4 +1,0 @@
-simpysql
-simpysql/Connections
-simpysql/Eloquent
-simpysql/Util

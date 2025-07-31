@@ -1,18 +1,16 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from cassandra.auth import PlainTextAuthProvider
-from cassandra.policies import RoundRobinPolicy
-from cassandra.cluster import NoHostAvailable
-from cassandra.cluster import Cluster
-from cassandra.connection import ssl
+from .CassandraConnectionpool import CassandraConnectionPool
+from cassandra.query import SimpleStatement
+from cassandra.query import BatchStatement
 from .Connection import Connection
 from ..Util.Logger import logger
 import threading
 
 
 class CassandraConnection(Connection):
-    _connection = {}
+    _connection_pool = None
     _instance = {}
     _lock = threading.Lock()
 
@@ -22,46 +20,30 @@ class CassandraConnection(Connection):
             self._logger = logger.set_path(config['LOG_DIR'])
         self._database = database
         self._config = config
+        if CassandraConnection._connection_pool is None:
+            self._connection_pool = CassandraConnectionPool(config)
 
     def execute(self, sql):
         self.log(sql)
         rows = self.connect().execute(sql)
         return [dict(row._asdict()) for row in rows]
 
+    async def execute_async(self, sqls, callback=None, error_callback=None):
+        for sql in sqls:
+            statement = SimpleStatement(sql)
+            future = self.connect().execute_async(statement)
+            future.add_callbacks(callback, error_callback)
+
+    def execute_batch(self, sqls):
+        batch = BatchStatement()
+        for sql in sqls:
+            self.log("batch sql:{}".format(sql))
+            batch.add(sql, ())
+        rows = self.connect().execute(batch)
+        return [dict(row._asdict()) for row in rows]
+
     def connect(self):
-        if self._connection.get(self._database) is None:
-            with self._lock:
-                if self._connection.get(self._database) is None:
-                    auth_provider = PlainTextAuthProvider(
-                        username=self._config['DB_USER'],
-                        password=self._config['DB_PASSWORD']
-                    )
-
-                    ssl_options = None
-                    if self._config.get('SSL_CA_CERTS'):
-                        ssl_options = {
-                            'ca_certs': self._config['SSL_CA_CERTS'],
-                            'ssl_version': ssl.PROTOCOL_TLSv1_2,
-                            'certfile': self._config.get('SSL_CERTFILE'),
-                            'keyfile': self._config.get('SSL_KEYFILE')
-                        }
-
-                    try:
-                        cluster = Cluster(
-                            self._config['DB_HOST'].split(","),
-                            port=int(self._config.get('DB_PORT', 9042)),
-                            auth_provider=auth_provider,
-                            load_balancing_policy=RoundRobinPolicy(),
-                            ssl_options=ssl_options
-                        )
-                        session = cluster.connect()
-                        session.set_keyspace(self._config['DB_KEYSPACE'])
-                        self._connection[self._database] = session
-                    except NoHostAvailable as e:
-                        if self._logger:
-                            self._logger.info(f"Could not connect to Cassandra: {e}")
-                        raise
-        return self._connection[self._database]
+        return self._connection_pool.get_session()
 
     @classmethod
     def instance(cls, database, config):

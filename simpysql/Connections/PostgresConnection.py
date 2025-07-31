@@ -5,6 +5,7 @@ from .Connection import Connection
 from functools import wraps
 from ..Util.Logger import logger
 import psycopg2
+import psycopg2.extras
 from .PostgresConnectionpool import connectionpool
 
 

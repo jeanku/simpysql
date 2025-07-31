@@ -1,5 +1,0 @@
-pymysql
-pandas
-configparser
-DBUtils
-pymongo

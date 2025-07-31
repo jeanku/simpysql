@@ -47,16 +47,18 @@ class CassandraBuilder(BaseBuilder):
     def get(self):
         return list(self._get_connection().execute(self._compile_select()))
 
-    async def async_get(self):
-        data = await self._get_connection().execute_async(self._compile_select())
-        return list(data)
+    async def excute_async(self, models, callback=None, error_callback=None):
+        await self._get_connection().execute_async([i._compile_select() for i in models], callback, error_callback)
+
+    def batch(self, models):
+        return list(self._get_connection().execute_batch([i._compile_select() for i in models]))
 
     def lists(self, column):
         return [i.get(column, None) for i in self._get_connection().execute(self._compile_select())]
 
     def pluck(self, key, value):
         data = self._get_connection().execute(self._compile_select())
-        return {getattr(i, key, ""): getattr(i, value, "") for i in data}
+        return {index[key]: index[value] for index in data}
 
     def max(self, column):
         if isinstance(column, str) and column in self.__model__.columns:
