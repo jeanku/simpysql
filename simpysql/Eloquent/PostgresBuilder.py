@@ -104,14 +104,14 @@ class PostgresBuilder(BaseBuilder):
     def increment(self, key, amount=1):
         if isinstance(amount, int) and amount > 0:
             data = collections.defaultdict(dict)
-            data[key] = '{}+{}'.format(expr.format_column(key, self.__model__), str(amount))
+            data[key] = '{}+{}'.format(expr.format_column_for_postgres(key, self.__model__), str(amount))
             data = self._set_update_time(data)
             return self._get_connection().execute(self._compile_increment(data))
 
     def decrement(self, key, amount=1):
         if isinstance(amount, int) and amount > 0:
             data = collections.defaultdict(dict)
-            data[key] = '{}-{}'.format(expr.format_column(key, self.__model__), str(amount))
+            data[key] = '{}-{}'.format(expr.format_column_for_postgres(key, self.__model__), str(amount))
             data = self._set_update_time(data)
             return self._get_connection().execute(self._compile_increment(data))
 
@@ -209,9 +209,9 @@ class PostgresBuilder(BaseBuilder):
 
     def orderby(self, column, direction='asc'):
         if direction.lower() == 'asc':
-            self.__orderby__.append(expr.format_column(column, self.__model__))
+            self.__orderby__.append(expr.format_column_for_postgres(column, self.__model__))
         else:
-            self.__orderby__.append(expr.format_column(column, self.__model__) + ' desc')
+            self.__orderby__.append(expr.format_column_for_postgres(column, self.__model__) + ' desc')
         return self
 
     def execute(self, sql):
@@ -311,7 +311,7 @@ class PostgresBuilder(BaseBuilder):
 
     def _compile_increment(self, data):
         subsql = ','.join(
-            ['{}={}'.format(expr.format_column(index, self.__model__), value) for index, value in data.items()])
+            ['{}={}'.format(expr.format_column_for_postgres(index, self.__model__), value) for index, value in data.items()])
         return "update {} set {}{}".format(self._tablename(), subsql, self._compile_where())
 
     def _compile_delete(self):
@@ -427,7 +427,7 @@ class PostgresBuilder(BaseBuilder):
         return ''
 
     def _compile_dict(self, data):
-        return ['{}={}'.format(expr.format_column(index, self.__model__), expr.format_string(value)) for index, value in
+        return ['{}={}'.format(expr.format_column_for_postgres(index, self.__model__), expr.format_string(value)) for index, value in
                 data.items()]
 
     def _compile_tuple(self, data):
@@ -435,10 +435,10 @@ class PostgresBuilder(BaseBuilder):
             return self._compile_in((data[0], data[1], data[2]))
         elif data[1] in ['between', 'not between']:
             return self._compile_between((data[0], data[1], data[2]))
-        return '{} {} {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.format_string(data[2]))
+        return '{} {} {}'.format(expr.format_column_for_postgres(data[0], self.__model__), data[1], expr.format_string(data[2]))
 
     def _compile_in(self, data):
-        return '{} {} {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.list_to_str(data[2]))
+        return '{} {} {}'.format(expr.format_column_for_postgres(data[0], self.__model__), data[1], expr.list_to_str(data[2]))
 
     def _compile_list(self, data):
         length = len(data)
@@ -459,12 +459,12 @@ class PostgresBuilder(BaseBuilder):
     def _compile_between(self, data):
         if not (len(data) == 3 and len(data[2]) == 2):
             raise Exception('between param invalid')
-        return '{} {} {} and {}'.format(expr.format_column(data[0], self.__model__), data[1],
+        return '{} {} {} and {}'.format(expr.format_column_for_postgres(data[0], self.__model__), data[1],
                                         expr.format_string(data[2][0]),
                                         expr.format_string(data[2][1]))
 
     def _compile_keyvalue(self, key, value):
-        return '{}={}'.format(expr.format_column(key, self.__model__), expr.format_string(value))
+        return '{}={}'.format(expr.format_column_for_postgres(key, self.__model__), expr.format_string(value))
 
     def _compile_subquery(self):
         subquery = []
@@ -500,7 +500,7 @@ class PostgresBuilder(BaseBuilder):
         return self.__model__.__tablename__ + ' as {}'.format(self.__alias__)
 
     def _format_columns(self, columns):
-        return list(map(lambda index: expr.format_column(index, self.__model__), columns))
+        return list(map(lambda index: expr.format_column_for_postgres(index, self.__model__), columns))
 
     def _set_create_time(self, data):
         currtime = self.__model__.fresh_timestamp()

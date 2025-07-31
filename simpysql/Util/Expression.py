@@ -19,6 +19,11 @@ class Expression(object):
             return '"{}"'.format(key)
         return key
 
+    def format_column_for_postgres(self, key, model=None):
+        if model is not None and model.columns and key in model.columns:
+            return '{}'.format(key)
+        return key
+
     def format_string(self, key):
         if isinstance(key, Expression):
             return key.__name
