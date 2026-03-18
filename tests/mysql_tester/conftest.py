@@ -182,6 +182,12 @@ def pytest_configure(config):
     config.addinivalue_line(
         "markers", "slow: 慢速测试"
     )
+    config.addinivalue_line(
+        "markers", "update_join: 测试 UPDATE JOIN 联表更新方法"
+    )
+    config.addinivalue_line(
+        "markers", "delete_join: 测试 DELETE JOIN 联表删除方法"
+    )
 
 
 def pytest_collection_modifyitems(config, items):

@@ -420,7 +420,18 @@ class MysqlBuilder(BaseBuilder):
 
     def _compile_update(self, data):
         where_clause = ''.join([self._compile_where(), self._compile_whereor(), self._compile_orwhere()])
-        return "update {} set {}{}".format(self._tablename(), ','.join(self._compile_dict(data)), where_clause)
+        joinsql = ''.join(self._compile_leftjoin())
+        # 如果有 JOIN，需要在 SET 子句中添加表别名前缀，避免字段歧义
+        if self.__join__:
+            # 获取主表别名或表名
+            if self.__alias__:
+                table_prefix = self.__alias__
+            else:
+                table_prefix = self.__model__.__tablename__
+            set_clause = ','.join(['{}.{}={}'.format(table_prefix, expr.format_column(index, self.__model__), expr.format_string(value)) for index, value in data.items()])
+        else:
+            set_clause = ','.join(self._compile_dict(data))
+        return "update {}{} set {}{}".format(self._tablename(), joinsql, set_clause, where_clause)
 
     def _compile_increment(self, data):
         subsql = ','.join(
@@ -429,6 +440,16 @@ class MysqlBuilder(BaseBuilder):
 
     def _compile_delete(self):
         where_clause = ''.join([self._compile_where(), self._compile_whereor(), self._compile_orwhere()])
+        joinsql = ''.join(self._compile_leftjoin())
+        # MySQL DELETE JOIN 语法: DELETE T1 FROM table1 T1 JOIN table2 T2 ON ...
+        # 如果有 JOIN，需要使用特殊语法
+        if self.__join__:
+            # 获取主表别名或表名
+            if self.__alias__:
+                main_table_ref = self.__alias__
+            else:
+                main_table_ref = self.__model__.__tablename__
+            return 'delete {} from {}{}{}'.format(main_table_ref, self._tablename(), joinsql, where_clause)
         return 'delete from {}{}'.format(self._tablename(), where_clause)
 
     def _compile_lastid(self):
@@ -558,6 +579,15 @@ class MysqlBuilder(BaseBuilder):
         return '{} {} {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.format_string(data[2]))
 
     def _compile_in(self, data):
+        # 处理空列表的情况
+        # 对于 IN 空列表：生成 1=0（不匹配任何行）
+        # 对于 NOT IN 空列表：生成 1=1（匹配所有行）
+        values = data[2]
+        if isinstance(values, (list, tuple)) and len(values) == 0:
+            if data[1] == 'in':
+                return '1=0'
+            else:  # not in
+                return '1=1'
         return '{} {} {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.list_to_str(data[2]))
 
     def _compile_list(self, data):
