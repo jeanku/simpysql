@@ -6,3 +6,4 @@ jemes/
 simpysql.egg-info/
 *.py[cod]
 .env
+**/logs/
