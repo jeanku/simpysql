@@ -83,7 +83,25 @@ class MysqlBuilder(BaseBuilder):
         # 恢复原有状态
         self.__select__ = original_select
         
-        return data['aggregate'] if data else None
+        if data is None:
+            return None
+        
+        result = data['aggregate']
+        # avg 返回浮点数，count 返回整数，其他尝试转换为合适的类型
+        if func_name == 'avg':
+            return float(result) if result is not None else None
+        elif func_name == 'count':
+            return int(result) if result is not None else 0
+        elif func_name in ('sum', 'max', 'min'):
+            # 尝试转换为数值类型
+            if result is not None:
+                try:
+                    if '.' in str(result):
+                        return float(result)
+                    return int(result)
+                except (ValueError, TypeError):
+                    return result
+        return result
 
     def max(self, column):
         """获取指定列的最大值"""
@@ -127,9 +145,15 @@ class MysqlBuilder(BaseBuilder):
         return result
 
     def update(self, data):
+        # 增加安全防护：禁止无条件全表更新
+        if not self.__where__ and not self.__orwhere__ and not self.__whereor__:
+            raise Exception("Update missing WHERE clause. This will update the entire table!")
+
         if data and isinstance(data, dict):
             data = self._set_update_time(data)
             data = {key: value for key, value in data.items() if key in self.__model__.columns}
+            if not data:  # 防止过滤后 data 为空导致语法错误
+                return 0
             return self._get_connection().execute(self._compile_update(data))
 
     def increment(self, key, amount=1):
@@ -198,6 +222,10 @@ class MysqlBuilder(BaseBuilder):
         return data[0][0] if data and data[0] and data[0][0] else None
 
     def delete(self):
+        # 增加安全防护：禁止无条件全表删除
+        if not self.__where__ and not self.__orwhere__ and not self.__whereor__:
+            raise Exception("Delete missing WHERE clause. This will delete the entire table!")
+
         return self._get_connection().execute(self._compile_delete())
 
     def take(self, number):
@@ -215,7 +243,7 @@ class MysqlBuilder(BaseBuilder):
         return self
 
     def offset(self, number):
-        if number <= 0:
+        if number < 0:
             raise Exception('offset number invalid')
         self.__offset__ = int(number)
         return self
@@ -350,17 +378,28 @@ class MysqlBuilder(BaseBuilder):
         return self.create(data)
 
     def _compile_select(self):
-        if len(self.__select__) == 0:
-            self.__select__.append('*')
-        subsql = ''.join(
-            [self._compile_where(), self._compile_whereor(), self._compile_orwhere(), self._compile_groupby(),
-             self._compile_orderby(),
-             self._compile_having(), self._compile_limit(), self._compile_offset(), self._compile_lock()])
-        joinsql = ''.join(self._compile_leftjoin())
-        returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(), joinsql, subsql)
+        # 使用局部变量，不污染 self.__select__
+        select_columns = self.__select__ if len(self.__select__) > 0 else ['*']
+        # 对于 UNION 查询，ORDER BY/LIMIT/OFFSET 应该应用于整个 UNION 结果
+        # 而不是第一个查询
         if self.__union__:
-            return '({})'.format(returnsql) + self._compile_union()
-        return returnsql
+            # 第一个查询不包含 ORDER BY/LIMIT/OFFSET
+            subsql = ''.join(
+                [self._compile_where(), self._compile_whereor(), self._compile_orwhere(), self._compile_groupby(),
+                 self._compile_having(), self._compile_lock()])
+            joinsql = ''.join(self._compile_leftjoin())
+            returnsql = "select {} from {}{}{}".format(','.join(select_columns), self._tablename(), joinsql, subsql)
+            # ORDER BY/LIMIT/OFFSET 应用于整个 UNION
+            union_suffix = ''.join([self._compile_orderby(), self._compile_limit(), self._compile_offset()])
+            return '({})'.format(returnsql) + self._compile_union() + union_suffix
+        else:
+            subsql = ''.join(
+                [self._compile_where(), self._compile_whereor(), self._compile_orwhere(), self._compile_groupby(),
+                 self._compile_orderby(),
+                 self._compile_having(), self._compile_limit(), self._compile_offset(), self._compile_lock()])
+            joinsql = ''.join(self._compile_leftjoin())
+            returnsql = "select {} from {}{}{}".format(','.join(select_columns), self._tablename(), joinsql, subsql)
+            return returnsql
 
     def _compile_create(self, data):
         return "insert into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
@@ -369,8 +408,12 @@ class MysqlBuilder(BaseBuilder):
         return "replace into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
 
     def _compile_insert(self, columns, data):
-        return "insert into {} {} values {}".format(self._tablename(), self._columnize(columns),
-                                                    ','.join([tuple(index).__str__() for index in data]))
+        # 避免元组转字符串的坑，确保值被正确格式化
+        values_list = []
+        for index in data:
+            row_values = ','.join([str(expr.format_string(v)) for v in index])
+            values_list.append('({})'.format(row_values))
+        return "insert into {} {} values {}".format(self._tablename(), self._columnize(columns), ','.join(values_list))
 
     def _compile_insert_ignore(self, data):
         return "insert ignore into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
@@ -392,10 +435,16 @@ class MysqlBuilder(BaseBuilder):
         return 'select last_insert_id() as lastid'
 
     def _columnize(self, columns):
-        return tuple(columns).__str__().replace('\'', '`')
+        # 强制格式化为 (`col1`, `col2`) 形式，避免单元素末尾多逗号
+        return '({})'.format(','.join(['`{}`'.format(c) for c in columns]))
 
     def _valueize(self, data):
-        return ','.join([tuple(index.values()).__str__() for index in data])
+        # 同样避免元组转字符串的坑，确保值被正确格式化
+        values_list = []
+        for index in data:
+            row_values = ','.join([str(expr.format_string(v)) for v in index.values()])
+            values_list.append('({})'.format(row_values))
+        return ','.join(values_list)
 
     def _compile_groupby(self):
         return '' if len(self.__groupby__) == 0 else ' group by ' + ','.join(self.__groupby__)

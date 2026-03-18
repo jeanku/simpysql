@@ -100,7 +100,8 @@ class TestTransactionWrapper:
             clean_users.create({'name': 'WrapperCommit', 'email': 'wrapper@test.com', 'age': 25, 'status': 1, 'score': 80.0})
             return True
         
-        result = clean_users.transaction_wrapper(create_user)
+        # transaction_wrapper 返回一个wrapper函数，需要调用它
+        result = clean_users.transaction_wrapper(create_user)()
         assert result is True
         
         # 验证数据已提交
@@ -115,7 +116,8 @@ class TestTransactionWrapper:
             raise Exception('Intentional rollback')
         
         with pytest.raises(Exception):
-            clean_users.transaction_wrapper(failed_operation)
+            # transaction_wrapper 返回一个wrapper函数，需要调用它
+            clean_users.transaction_wrapper(failed_operation)()
         
         # 验证数据已回滚
         user = clean_users.where('name', 'WrapperRollback').first()

@@ -34,8 +34,13 @@ class MysqlConnection(Connection):
             cursor = conn.cursor(cursor=cursorclass)
             affected_rows = cursor.execute(sql)
 
-            # 区分查询与修改的返回值 (上一轮的修复)
-            if sql.strip().lower().startswith(('select', 'show', 'desc', 'explain')):
+            # 区分查询与修改的返回值
+            # UNION 查询可能以 (select 开头，需要去除前导括号来判断
+            sql_stripped = sql.strip().lower()
+            # 去除前导括号（用于 UNION 查询如 (select...) union (select...)）
+            while sql_stripped.startswith('('):
+                sql_stripped = sql_stripped[1:].strip()
+            if sql_stripped.startswith(('select', 'show', 'desc', 'explain')):
                 data = cursor.fetchall()
             else:
                 data = affected_rows
@@ -53,37 +58,34 @@ class MysqlConnection(Connection):
                 conn.close()
 
     def transaction(self, callback):
-        # 事务开始前，从连接池获取一个专属连接，并绑定到当前线程
-        conn = self._get_pool_connection()
-        self._local.transaction_conn = conn
+        # 检查是否已经是嵌套事务
+        is_nested = getattr(self._local, 'transaction_conn', None) is not None
+        conn = self._local.transaction_conn if is_nested else self._get_pool_connection()
+
+        if not is_nested:
+            self._local.transaction_conn = conn
+
         try:
             result = callback()
-            conn.commit()
+            # 只有最外层事务才执行真正的 commit
+            if not is_nested:
+                conn.commit()
             return result
         except Exception as e:
-            conn.rollback()
+            # 任何一层报错，外层连接回滚
+            if not is_nested:
+                conn.rollback()
             raise e
         finally:
-            # 事务结束，解绑线程变量，并归还连接给连接池
-            conn.close()
-            self._local.transaction_conn = None
+            # 只有最外层才负责归还连接并清空标志
+            if not is_nested:
+                conn.close()
+                self._local.transaction_conn = None
 
     def transaction_wrapper(self, callback):
         @wraps(callback)
         def wrapper(*args, **kwargs):
-            conn = self._get_pool_connection()
-            self._local.transaction_conn = conn
-            try:
-                result = callback(*args, **kwargs)
-                conn.commit()
-                return result
-            except Exception as e:
-                conn.rollback()
-                raise e
-            finally:
-                conn.close()
-                self._local.transaction_conn = None
-
+            return self.transaction(lambda: callback(*args, **kwargs))
         return wrapper
 
     @classmethod

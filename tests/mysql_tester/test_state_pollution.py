@@ -160,7 +160,7 @@ class TestAggregateStatePollution:
         
         # 验证再次调用 get() 时 select 仍然是原始
         result = builder.get()
-        assert builder._MysqlBuilder__select__ == original_select
+        assert builder.__select__ == original_select
 
 
 class TestBuilderReusability:
@@ -173,10 +173,10 @@ class TestBuilderReusability:
         clean_users.create({'name': 'Reusable1', 'email': 'reusable@test.com', 'age': 25, 'status': 1, 'score': 80.0})
         
         # 创建第一个 builder
-        builder1 = clean_users.where('name', 'Reusable')
+        builder1 = clean_users.where('name', 'Reusable1')
         
         # 创建第二个 builder (复用第一个)
-        builder2 = clean_users.where('name', 'Reusable')
+        builder2 = clean_users.where('name', 'Reusable1')
         
         # 验证两个 builder 是独立的实例
         assert builder1 is not builder2
@@ -190,8 +190,8 @@ class TestBuilderReusability:
         assert result2 is not None
         
         # 验证两个 builder 不互相影响
-        assert result1['name'] == 'Reusable'
-        assert result2['name'] == 'Reusable'
+        assert result1['name'] == 'Reusable1'
+        assert result2['name'] == 'Reusable1'
 
 
 class TestWhereStatePollution:

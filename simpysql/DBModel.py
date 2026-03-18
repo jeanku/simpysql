@@ -26,7 +26,7 @@ class DBModel(MagicMetaClass):
 
     @classmethod
     def transaction(cls, callback):
-        return cls.__new__(cls).transaction_wrapper(callback)
+        return cls.__new__(cls).transaction(callback)
 
     def __new__(cls, *args, **kwargs):
         if len(args) > 0 and isinstance(args[0], str):

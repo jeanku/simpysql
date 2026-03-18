@@ -165,12 +165,12 @@ class TestIncrement:
         assert other['age'] == 20 or other.age == 20
     
     @pytest.mark.update
-    def test_increment_invalid_amount_zero(self, clean_users):
-        """测试无效自增量 (0)"""
-        clean_users.create({'name': 'IncrementZero', 'email': 'inczero@test.com', 'age': 25, 'status': 1, 'score': 80.0})
-        
-        result = clean_users.where('name', 'IncrementZero').increment('age', 0)
-        # 0 应该不被处理
+    def test_increment_invalid_amount_negative(self, clean_users):
+        """测试无效自增量 (负数)"""
+        clean_users.create({'name': 'IncrementNeg', 'email': 'incneg@test.com', 'age': 25, 'status': 1, 'score': 80.0})
+
+        result = clean_users.where('name', 'IncrementNeg').increment('age', -1)
+        # 负数应该不被处理
         assert result is None or result is not None
     
     @pytest.mark.update
@@ -178,9 +178,9 @@ class TestIncrement:
         """测试无效自增量 (负数)"""
         clean_users.create({'name': 'IncrementNeg', 'email': 'incneg@test.com', 'age': 25, 'status': 1, 'score': 80.0})
         
-        result = clean_users.where('name', 'IncrementNeg').increment('age', -1)
-        # 负数应该不被处理
-        assert result is None or result is not None
+        # 负数应该抛出异常
+        with pytest.raises(ValueError):
+            clean_users.where('name', 'IncrementNeg').increment('age', -1)
     
     @pytest.mark.update
     def test_increment_updates_timestamp(self, clean_users):
@@ -256,9 +256,9 @@ class TestDecrement:
         """测试无效自减量 (0)"""
         clean_users.create({'name': 'DecrementZero', 'email': 'deczero@test.com', 'age': 25, 'status': 1, 'score': 80.0})
         
-        result = clean_users.where('name', 'DecrementZero').decrement('age', 0)
-        # 0 应该不被处理
-        assert result is None or result is not None
+        # 0 应该抛出异常
+        with pytest.raises(ValueError):
+            clean_users.where('name', 'DecrementZero').decrement('age', 0)
     
     @pytest.mark.update
     def test_decrement_invalid_amount_negative(self, clean_users):

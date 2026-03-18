@@ -114,7 +114,7 @@ class TestDelete:
             clean_users.create({'name': f'DeleteAll{i}', 'email': f'delall{i}@test.com', 'age': 25, 'status': 1, 'score': 80.0})
         
         # 删除所有数据
-        result = clean_users.delete()
+        result = clean_users.where('1', '=', '1').delete()
         assert result is not None
         
         # 确认所有数据已删除
