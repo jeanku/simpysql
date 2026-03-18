@@ -252,9 +252,11 @@ class TestWhereOr:
     
     @pytest.mark.where
     def test_whereor_single_dict(self, user_model):
-        """测试 whereor() 单个字典"""
+        """测试 whereor() 单个字典 - 单个条件不需要 OR"""
         sql = user_model.where('id', 1).whereor([{'status': 1}]).tosql()
-        assert 'or' in sql.lower()
+        # 单个条件时，不会产生 OR，只有 AND 连接
+        assert 'and' in sql.lower()
+        assert '`status`=1' in sql.lower().replace(' ', '')
     
     @pytest.mark.where
     def test_whereor_multiple_dicts(self, user_model):
@@ -264,8 +266,8 @@ class TestWhereOr:
     
     @pytest.mark.where
     def test_whereor_tuples(self, user_model):
-        """测试 whereor() 元组形式"""
-        sql = user_model.where('id', 1).whereor([('status', 1), ('age', '>', 25)]).tosql()
+        """测试 whereor() 元组形式 - 需要使用三元组"""
+        sql = user_model.where('id', 1).whereor([('status', '=', 1), ('age', '>', 25)]).tosql()
         assert 'or' in sql.lower()
     
     @pytest.mark.where

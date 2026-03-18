@@ -265,9 +265,9 @@ class TestDecrement:
         """测试无效自减量 (负数)"""
         clean_users.create({'name': 'DecrementNeg', 'email': 'decneg@test.com', 'age': 25, 'status': 1, 'score': 80.0})
         
-        result = clean_users.where('name', 'DecrementNeg').decrement('age', -1)
-        # 负数应该不被处理
-        assert result is None or result is not None
+        # 负数应该抛出异常
+        with pytest.raises(ValueError):
+            clean_users.where('name', 'DecrementNeg').decrement('age', -1)
     
     @pytest.mark.update
     def test_decrement_updates_timestamp(self, clean_users):

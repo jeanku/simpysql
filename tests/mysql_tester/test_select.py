@@ -23,7 +23,7 @@ class TestSelect:
     def test_select_specific_columns(self, user_model):
         """测试选择特定字段"""
         sql = user_model.select('id', 'name', 'email').tosql()
-        assert 'select `id`,`name`,`email`' in sql.lower().replace(' ', '')
+        assert 'select`id`,`name`,`email`' in sql.lower().replace(' ', '')
     
     @pytest.mark.select
     def test_select_single_column(self, user_model):

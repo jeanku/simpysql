@@ -22,17 +22,17 @@ class TestFirstStatePollution:
         builder = clean_users.where('name', 'FirstPollution')
         
         # 记录原始 limit 状态
-        original_limit = builder._MysqlBuilder__limit__
+        original_limit = builder.__limit__
         
         # 调用 first()
         result = builder.first()
         
         # 验证 limit 已恢复
-        assert builder._MysqlBuilder__limit__ == original_limit
+        assert builder.__limit__ == original_limit
         
         # 验证再次调用 get() 时 limit 仍然是 None
         result2 = builder.get()
-        assert builder._MysqlBuilder__limit__ is None
+        assert builder.__limit__ is None
     
     @pytest.mark.state
     def test_first_returns_empty_dict(self, clean_users):
@@ -57,17 +57,17 @@ class TestCountStatePollution:
         builder = clean_users.where('name', 'like', 'CountPollution%')
         
         # 记录原始 select 状态
-        original_select = builder._MysqlBuilder__select__
+        original_select = builder.__select__
         
         # 调用 count()
         result = builder.count()
         
         # 验证 select 已恢复
-        assert builder._MysqlBuilder__select__ == original_select
+        assert builder.__select__ == original_select
         
         # 验证再次调用 get() 时 select 仍然是原始
         result2 = builder.get()
-        assert builder._MysqlBuilder__select__ == original_select
+        assert builder.__select__ == original_select
 
 
 class TestMaxStatePollution:
@@ -84,17 +84,17 @@ class TestMaxStatePollution:
         builder = clean_users.where('name', 'like', 'MaxPollution%')
         
         # 记录原始 select 状态
-        original_select = builder._MysqlBuilder__select__
+        original_select = builder.__select__
         
         # 调用 max()
         result = builder.max('id')
         
         # 验证 select 已恢复
-        assert builder._MysqlBuilder__select__ == original_select
+        assert builder.__select__ == original_select
         
         # 验证再次调用 get() 时 select 仍然是原始
         result2 = builder.get()
-        assert builder._MysqlBuilder__select__ == original_select
+        assert builder.__select__ == original_select
 
 
 class TestExistStatePollution:
@@ -111,17 +111,17 @@ class TestExistStatePollution:
         builder = clean_users.where('name', 'like', 'ExistPollution%')
         
         # 记录原始 limit 状态
-        original_limit = builder._MysqlBuilder__limit__
+        original_limit = builder.__limit__
         
         # 调用 exist()
         result = builder.exist()
         
         # 验证 limit 已恢复
-        assert builder._MysqlBuilder__limit__ == original_limit
+        assert builder.__limit__ == original_limit
         
         # 验证再次调用 get() 时 limit 仍然是 None
         result2 = builder.get()
-        assert builder._MysqlBuilder__limit__ is None
+        assert builder.__limit__ is None
 
 
 class TestAggregateStatePollution:
@@ -138,7 +138,7 @@ class TestAggregateStatePollution:
         builder = clean_users.where('name', 'like', 'AggregatePollution%')
         
         # 记录原始 select 状态
-        original_select = builder._MysqlBuilder__select__
+        original_select = builder.__select__
         
         # 调用 count()
         count_result = builder.count()
@@ -156,7 +156,7 @@ class TestAggregateStatePollution:
         sum_result = builder.sum('score')
         
         # 验证 select 已恢复
-        assert builder._MysqlBuilder__select__ == original_select
+        assert builder.__select__ == original_select
         
         # 验证再次调用 get() 时 select 仍然是原始
         result = builder.get()
