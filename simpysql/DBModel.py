@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+import inspect
 
 from .Eloquent.BuilderFactory import builderfactory
 from .Util.MagicMetaClass import MagicMetaClass
@@ -25,8 +25,20 @@ class DBModel(MagicMetaClass):
         return int(time.time())
 
     @classmethod
-    def transaction(cls, callback):
-        return cls.__new__(cls).transaction(callback)
+    def transaction(cls, callback=None):
+        builder = cls.__new__(cls)
+
+        # 兼容写法：如果用户写了 @ModelDemo.transaction() 带括号
+        if callback is None:
+            return builder.transaction_wrapper
+
+        # 智能探测：如果函数带有参数，那绝对是作为装饰器使用的
+        sig = inspect.signature(callback)
+        if len(sig.parameters) > 0:
+            return builder.transaction_wrapper(callback)
+
+        # 默认情况：如果是无参函数，走传统的立即执行 (方法 1)
+        return builder.transaction(callback)
 
     def __new__(cls, *args, **kwargs):
         if len(args) > 0 and isinstance(args[0], str):
