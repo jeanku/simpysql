@@ -305,3 +305,113 @@ class TestUpdateSQL:
         """测试 INCREMENT SQL 生成"""
         builder = user_model.where('id', 1)
         assert builder is not None
+
+
+class TestIncrementDecrementMultipleRows:
+    """测试 increment 和 decrement 方法影响多行数据时返回正确的受影响行数"""
+    
+    @pytest.mark.update
+    def test_increment_affects_multiple_rows(self, clean_users):
+        """测试 increment 影响多行时返回值大于1"""
+        # 插入多条测试数据，使用相同的前缀便于批量更新
+        num_rows = 5
+        for i in range(num_rows):
+            clean_users.create({
+                'name': f'IncrementMulti{i}', 
+                'email': f'incmulti{i}@test.com', 
+                'age': 20, 
+                'status': 1, 
+                'score': 80.0
+            })
+        
+        # 使用 whereIn 条件批量自增
+        result = clean_users.where('name', 'like', 'IncrementMulti%').increment('age', 1)
+        
+        # 验证返回值是受影响的行数，应该大于1
+        assert result is not None, "increment 方法应该返回受影响的行数"
+        assert result > 1, f"increment 影响多行时应返回大于1的值，实际返回: {result}"
+        assert result == num_rows, f"increment 应返回 {num_rows} 行受影响，实际返回: {result}"
+        
+        # 验证所有数据确实被更新
+        updated_rows = clean_users.where('name', 'like', 'IncrementMulti%').get()
+        for row in updated_rows:
+            assert row['age'] == 21 or row.age == 21, f"行 {row.get('id')} 的 age 应该为 21"
+    
+    @pytest.mark.update
+    def test_decrement_affects_multiple_rows(self, clean_users):
+        """测试 decrement 影响多行时返回值大于1"""
+        # 插入多条测试数据，使用相同的前缀便于批量更新
+        num_rows = 5
+        for i in range(num_rows):
+            clean_users.create({
+                'name': f'DecrementMulti{i}', 
+                'email': f'decmulti{i}@test.com', 
+                'age': 50, 
+                'status': 1, 
+                'score': 80.0
+            })
+        
+        # 使用 whereIn 条件批量自减
+        result = clean_users.where('name', 'like', 'DecrementMulti%').decrement('age', 1)
+        
+        # 验证返回值是受影响的行数，应该大于1
+        assert result is not None, "decrement 方法应该返回受影响的行数"
+        assert result > 1, f"decrement 影响多行时应返回大于1的值，实际返回: {result}"
+        assert result == num_rows, f"decrement 应返回 {num_rows} 行受影响，实际返回: {result}"
+        
+        # 验证所有数据确实被更新
+        updated_rows = clean_users.where('name', 'like', 'DecrementMulti%').get()
+        for row in updated_rows:
+            assert row['age'] == 49 or row.age == 49, f"行 {row.get('id')} 的 age 应该为 49"
+    
+    @pytest.mark.update
+    def test_increment_custom_amount_multiple_rows(self, clean_users):
+        """测试 increment 使用自定义增量影响多行时返回正确行数"""
+        # 插入多条测试数据
+        num_rows = 3
+        for i in range(num_rows):
+            clean_users.create({
+                'name': f'IncrementCustomMulti{i}', 
+                'email': f'inccustmulti{i}@test.com', 
+                'age': 10, 
+                'status': 1, 
+                'score': 80.0
+            })
+        
+        # 批量自增 5
+        result = clean_users.where('name', 'like', 'IncrementCustomMulti%').increment('age', 5)
+        
+        # 验证返回值
+        assert result is not None, "increment 方法应该返回受影响的行数"
+        assert result == num_rows, f"increment 应返回 {num_rows} 行受影响，实际返回: {result}"
+        
+        # 验证数据更新正确
+        updated_rows = clean_users.where('name', 'like', 'IncrementCustomMulti%').get()
+        for row in updated_rows:
+            assert row['age'] == 15 or row.age == 15, f"行 {row.get('id')} 的 age 应该为 15"
+    
+    @pytest.mark.update
+    def test_decrement_custom_amount_multiple_rows(self, clean_users):
+        """测试 decrement 使用自定义减量影响多行时返回正确行数"""
+        # 插入多条测试数据
+        num_rows = 3
+        for i in range(num_rows):
+            clean_users.create({
+                'name': f'DecrementCustomMulti{i}', 
+                'email': f'deccustmulti{i}@test.com', 
+                'age': 100, 
+                'status': 1, 
+                'score': 80.0
+            })
+        
+        # 批量自减 10
+        result = clean_users.where('name', 'like', 'DecrementCustomMulti%').decrement('age', 10)
+        
+        # 验证返回值
+        assert result is not None, "decrement 方法应该返回受影响的行数"
+        assert result == num_rows, f"decrement 应返回 {num_rows} 行受影响，实际返回: {result}"
+        
+        # 验证数据更新正确
+        updated_rows = clean_users.where('name', 'like', 'DecrementCustomMulti%').get()
+        for row in updated_rows:
+            assert row['age'] == 90 or row.age == 90, f"行 {row.get('id')} 的 age 应该为 90"
