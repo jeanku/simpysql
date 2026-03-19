@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import collections
 from pymysql.cursors import DictCursor
 from simpysql.Util.Expression import expression as expr, Expression
 from simpysql.Util.Response import Response
@@ -38,11 +37,15 @@ class MysqlBuilder(BaseBuilder):
         self.__subquery__ = []  # subquery
 
     def first(self):
+        # 暂存原有的 limit
+        original_limit = self.__limit__
         self.__limit__ = 1
         data = self.get()
+        # 恢复原有状态
+        self.__limit__ = original_limit
         if data:
             return data.pop()
-        return data
+        return None
 
     def get(self):
         return [Dynamic(index) for index in self._get_connection().execute(self._compile_select(), DictCursor)]
@@ -59,62 +62,115 @@ class MysqlBuilder(BaseBuilder):
     def response(self):
         return Response(self._get_connection().execute(self._compile_select(), DictCursor))
 
+    def _aggregate(self, func_name, column=None):
+        """
+        内部方法：执行聚合查询（DRY 原则重构）
+        :param func_name: 聚合函数名 (max, min, avg, sum, count)
+        :param column: 列名，count时可为None表示 count(*)
+        :return: 聚合结果
+        """
+        # 暂存原有状态
+        original_select = self.__select__
+        
+        # 构建聚合SQL
+        if column is None:
+            self.__select__ = ['{}(*) as aggregate'.format(func_name)]
+        else:
+            self.__select__ = ['{}({}) as aggregate'.format(func_name, column)]
+        
+        data = self.first()
+        
+        # 恢复原有状态
+        self.__select__ = original_select
+        
+        if data is None:
+            return None
+        
+        result = data['aggregate']
+        # avg 返回浮点数，count 返回整数，其他尝试转换为合适的类型
+        if func_name == 'avg':
+            return float(result) if result is not None else None
+        elif func_name == 'count':
+            return int(result) if result is not None else 0
+        elif func_name in ('sum', 'max', 'min'):
+            # 尝试转换为数值类型
+            if result is not None:
+                try:
+                    if '.' in str(result):
+                        return float(result)
+                    return int(result)
+                except (ValueError, TypeError):
+                    return result
+        return result
+
     def max(self, column):
+        """获取指定列的最大值"""
         if isinstance(column, str) and column in self.__model__.columns:
-            self.__select__ = ['max({}) as aggregate'.format(column)]
-            data = self.first()
-            return data['aggregate'] if data else None
+            return self._aggregate('max', column)
         raise Exception('param invalid in function max')
 
     def min(self, column):
+        """获取指定列的最小值"""
         if isinstance(column, str) and column in self.__model__.columns:
-            self.__select__ = ['min({}) as aggregate'.format(column)]
-            data = self.first()
-            return data['aggregate'] if data else None
+            return self._aggregate('min', column)
         raise Exception('param invalid in function min')
 
     def avg(self, column):
+        """获取指定列的平均值"""
         if isinstance(column, str) and column in self.__model__.columns:
-            self.__select__ = ['avg({}) as aggregate'.format(column)]
-            data = self.first()
-            return data['aggregate'] if data else None
+            return self._aggregate('avg', column)
         raise Exception('param invalid in function avg')
 
     def sum(self, column):
+        """获取指定列的总和"""
         if isinstance(column, str) and column in self.__model__.columns:
-            self.__select__ = ['sum({}) as aggregate'.format(column)]
-            data = self.first()
-            return data['aggregate'] if data else None
+            return self._aggregate('sum', column)
         raise Exception('param invalid in function sum')
 
-    def count(self):
-        self.__select__ = ['count(*) as aggregate']
-        data = self.first()
-        return data['aggregate'] if data else None
+    def count(self, column=None):
+        """获取记录数量"""
+        if column is None:
+            return self._aggregate('count')
+        if isinstance(column, str) and column in self.__model__.columns:
+            return self._aggregate('count', column)
+        raise Exception('param invalid in function count')
 
     def exist(self):
+        # 暂存原有的 limit
+        original_limit = self.__limit__
         self.__limit__ = 1
-        return True if len(self.get()) > 0 else False
+        result = True if len(self.get()) > 0 else False
+        # 恢复原有状态
+        self.__limit__ = original_limit
+        return result
 
     def update(self, data):
+        # 增加安全防护：禁止无条件全表更新
+        if not self.__where__ and not self.__orwhere__ and not self.__whereor__:
+            raise Exception("Update missing WHERE clause. This will update the entire table!")
+
         if data and isinstance(data, dict):
             data = self._set_update_time(data)
             data = {key: value for key, value in data.items() if key in self.__model__.columns}
+            if not data:  # 防止过滤后 data 为空导致语法错误
+                return 0
             return self._get_connection().execute(self._compile_update(data))
 
     def increment(self, key, amount=1):
-        if isinstance(amount, int) and amount > 0:
-            data = collections.defaultdict(dict)
-            data[key] = '{}+{}'.format(expr.format_column(key, self.__model__), str(amount))
-            data = self._set_crease_update_time(data)
-            return self._get_connection().execute(self._compile_increment(data))
+        if not (isinstance(amount, int) and amount > 0):
+            raise ValueError('increment amount must be a positive integer')
+        data = {}
+        data[key] = '{}+{}'.format(expr.format_column(key, self.__model__), str(amount))
+        data = self._set_crease_update_time(data)
+        return self._get_connection().execute(self._compile_increment(data))
 
     def decrement(self, key, amount=1):
-        if isinstance(amount, int) and amount > 0:
-            data = collections.defaultdict(dict)
-            data[key] = '{}-{}'.format(expr.format_column(key, self.__model__), str(amount))
-            data = self._set_crease_update_time(data)
-            return self._get_connection().execute(self._compile_increment(data))
+        if not (isinstance(amount, int) and amount > 0):
+            raise ValueError('decrement amount must be a positive integer')
+        data = {}
+        data[key] = '{}-{}'.format(expr.format_column(key, self.__model__), str(amount))
+        data = self._set_crease_update_time(data)
+        return self._get_connection().execute(self._compile_increment(data))
 
     def create(self, data):
         if data:
@@ -166,6 +222,10 @@ class MysqlBuilder(BaseBuilder):
         return data[0][0] if data and data[0] and data[0][0] else None
 
     def delete(self):
+        # 增加安全防护：禁止无条件全表删除
+        if not self.__where__ and not self.__orwhere__ and not self.__whereor__:
+            raise Exception("Delete missing WHERE clause. This will delete the entire table!")
+
         return self._get_connection().execute(self._compile_delete())
 
     def take(self, number):
@@ -183,7 +243,7 @@ class MysqlBuilder(BaseBuilder):
         return self
 
     def offset(self, number):
-        if number <= 0:
+        if number < 0:
             raise Exception('offset number invalid')
         self.__offset__ = int(number)
         return self
@@ -318,17 +378,28 @@ class MysqlBuilder(BaseBuilder):
         return self.create(data)
 
     def _compile_select(self):
-        if len(self.__select__) == 0:
-            self.__select__.append('*')
-        subsql = ''.join(
-            [self._compile_where(), self._compile_whereor(), self._compile_orwhere(), self._compile_groupby(),
-             self._compile_orderby(),
-             self._compile_having(), self._compile_limit(), self._compile_offset(), self._compile_lock()])
-        joinsql = ''.join(self._compile_leftjoin())
-        returnsql = "select {} from {}{}{}".format(','.join(self.__select__), self._tablename(), joinsql, subsql)
+        # 使用局部变量，不污染 self.__select__
+        select_columns = self.__select__ if len(self.__select__) > 0 else ['*']
+        # 对于 UNION 查询，ORDER BY/LIMIT/OFFSET 应该应用于整个 UNION 结果
+        # 而不是第一个查询
         if self.__union__:
-            return '({})'.format(returnsql) + self._compile_union()
-        return returnsql
+            # 第一个查询不包含 ORDER BY/LIMIT/OFFSET
+            subsql = ''.join(
+                [self._compile_where(), self._compile_whereor(), self._compile_orwhere(), self._compile_groupby(),
+                 self._compile_having(), self._compile_lock()])
+            joinsql = ''.join(self._compile_leftjoin())
+            returnsql = "select {} from {}{}{}".format(','.join(select_columns), self._tablename(), joinsql, subsql)
+            # ORDER BY/LIMIT/OFFSET 应用于整个 UNION
+            union_suffix = ''.join([self._compile_orderby(), self._compile_limit(), self._compile_offset()])
+            return '({})'.format(returnsql) + self._compile_union() + union_suffix
+        else:
+            subsql = ''.join(
+                [self._compile_where(), self._compile_whereor(), self._compile_orwhere(), self._compile_groupby(),
+                 self._compile_orderby(),
+                 self._compile_having(), self._compile_limit(), self._compile_offset(), self._compile_lock()])
+            joinsql = ''.join(self._compile_leftjoin())
+            returnsql = "select {} from {}{}{}".format(','.join(select_columns), self._tablename(), joinsql, subsql)
+            return returnsql
 
     def _compile_create(self, data):
         return "insert into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
@@ -337,14 +408,30 @@ class MysqlBuilder(BaseBuilder):
         return "replace into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
 
     def _compile_insert(self, columns, data):
-        return "insert into {} {} values {}".format(self._tablename(), self._columnize(columns),
-                                                    ','.join([tuple(index).__str__() for index in data]))
+        # 避免元组转字符串的坑，确保值被正确格式化
+        values_list = []
+        for index in data:
+            row_values = ','.join([str(expr.format_string(v)) for v in index])
+            values_list.append('({})'.format(row_values))
+        return "insert into {} {} values {}".format(self._tablename(), self._columnize(columns), ','.join(values_list))
 
     def _compile_insert_ignore(self, data):
         return "insert ignore into {} {} values {}".format(self._tablename(), self._columnize(data[0]), self._valueize(data))
 
     def _compile_update(self, data):
-        return "update {} set {}{}".format(self._tablename(), ','.join(self._compile_dict(data)), self._compile_where())
+        where_clause = ''.join([self._compile_where(), self._compile_whereor(), self._compile_orwhere()])
+        joinsql = ''.join(self._compile_leftjoin())
+        # 如果有 JOIN，需要在 SET 子句中添加表别名前缀，避免字段歧义
+        if self.__join__:
+            # 获取主表别名或表名
+            if self.__alias__:
+                table_prefix = self.__alias__
+            else:
+                table_prefix = self.__model__.__tablename__
+            set_clause = ','.join(['{}.{}={}'.format(table_prefix, expr.format_column(index, self.__model__), expr.format_string(value)) for index, value in data.items()])
+        else:
+            set_clause = ','.join(self._compile_dict(data))
+        return "update {}{} set {}{}".format(self._tablename(), joinsql, set_clause, where_clause)
 
     def _compile_increment(self, data):
         subsql = ','.join(
@@ -352,16 +439,33 @@ class MysqlBuilder(BaseBuilder):
         return "update {} set {}{}".format(self._tablename(), subsql, self._compile_where())
 
     def _compile_delete(self):
-        return 'delete from {}{}'.format(self._tablename(), self._compile_where())
+        where_clause = ''.join([self._compile_where(), self._compile_whereor(), self._compile_orwhere()])
+        joinsql = ''.join(self._compile_leftjoin())
+        # MySQL DELETE JOIN 语法: DELETE T1 FROM table1 T1 JOIN table2 T2 ON ...
+        # 如果有 JOIN，需要使用特殊语法
+        if self.__join__:
+            # 获取主表别名或表名
+            if self.__alias__:
+                main_table_ref = self.__alias__
+            else:
+                main_table_ref = self.__model__.__tablename__
+            return 'delete {} from {}{}{}'.format(main_table_ref, self._tablename(), joinsql, where_clause)
+        return 'delete from {}{}'.format(self._tablename(), where_clause)
 
     def _compile_lastid(self):
         return 'select last_insert_id() as lastid'
 
     def _columnize(self, columns):
-        return tuple(columns).__str__().replace('\'', '`')
+        # 强制格式化为 (`col1`, `col2`) 形式，避免单元素末尾多逗号
+        return '({})'.format(','.join(['`{}`'.format(c) for c in columns]))
 
     def _valueize(self, data):
-        return ','.join([tuple(index.values()).__str__() for index in data])
+        # 同样避免元组转字符串的坑，确保值被正确格式化
+        values_list = []
+        for index in data:
+            row_values = ','.join([str(expr.format_string(v)) for v in index.values()])
+            values_list.append('({})'.format(row_values))
+        return ','.join(values_list)
 
     def _compile_groupby(self):
         return '' if len(self.__groupby__) == 0 else ' group by ' + ','.join(self.__groupby__)
@@ -475,6 +579,15 @@ class MysqlBuilder(BaseBuilder):
         return '{} {} {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.format_string(data[2]))
 
     def _compile_in(self, data):
+        # 处理空列表的情况
+        # 对于 IN 空列表：生成 1=0（不匹配任何行）
+        # 对于 NOT IN 空列表：生成 1=1（匹配所有行）
+        values = data[2]
+        if isinstance(values, (list, tuple)) and len(values) == 0:
+            if data[1] == 'in':
+                return '1=0'
+            else:  # not in
+                return '1=1'
         return '{} {} {}'.format(expr.format_column(data[0], self.__model__), data[1], expr.list_to_str(data[2]))
 
     def _compile_list(self, data):

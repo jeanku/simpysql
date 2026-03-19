@@ -5,7 +5,7 @@
 
 __author__ = ''
 
-from tests.mysqlDemo.BaseModel import BaseModel
+from tests.mysql_tester.BaseModel import BaseModel
 
 class ModelDemo1(BaseModel):
 

@@ -7,7 +7,7 @@ __author__ = ''
 
 import time
 
-from tests.mysqlDemo.BaseModel import BaseModel
+from tests.mysql_tester.BaseModel import BaseModel
 import asyncio
 
 class ModelDemo(BaseModel):
